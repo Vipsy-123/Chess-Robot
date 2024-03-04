@@ -12,7 +12,7 @@ def save_predictions(predictions):
         json.dump(predictions, json_file)
 
 inference.Stream(
-    source = "VID20240128155848.mp4", # To use webcam add 'webcam'
+    source = "../media/VID20240128155848.mp4", # To use webcam add 'webcam'
     model = "chessv1-5ew7x/1", # from Universe
 
     output_channel_order = "BGR",
