@@ -6,7 +6,6 @@
     2] It annotates the detected corners on the video frame and extracts the chessboard image.
     3] The extracted Chessboard image is then saved for further processing.
 
-
 '''
 import cv2
 from inference import InferencePipeline

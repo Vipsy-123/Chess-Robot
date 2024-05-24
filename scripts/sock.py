@@ -6,7 +6,7 @@ def main():
     try : 
         s = socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
         s.connect((host,port)) 
-        # Convert the string to bytes and then send it
+        # Convert the string to bytes and then send its
         s.sendall(b'1,2,1')
         data = s.recv(1024) 
         print('Received:', data.decode())  # Decode received bytes to string

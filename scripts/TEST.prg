@@ -1,12 +1,89 @@
 Function Main
+    Const 1 = Pa1
     Open "COM2:" As #1
     Input #1,Data1,Data2,Data3
-    Dim C1$(64)
-    For Idx=1 To 64 Step 1  ' Processing for storing a value in Mary
-        C1$(Idx) = "P"
-    Next
-    If ATTK = 1 Then
-        PieceAttack(Pa1,Ph8)
+    Select Data1
+    Case 1
+        PSRC = Pa1
+        Break
+    Case 2
+        PSRC = Pa2
+        Break
+    Case 3
+        PSRC = Pa3
+        Break
+    Case 4
+        PSRC = Pa4
+        Break
+    Case 5
+        PSRC = Pa5
+        Break
+    Case 6
+        PSRC = Pa6
+        Break
+    Case 7
+        PSRC = Pa7
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Case 8
+        PSRC = Pa8
+        Break
+    Default 
+        PSRC = PHome
+        Break
+    End Select
+    If Data3 = 1 Then
+        PieceAttack(PSRC,PDEST)
     Else
         PieceMove(PSRC,PDEST)
     EndIf

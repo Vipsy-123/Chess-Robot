@@ -24,9 +24,7 @@ def play(fen_string):
         print("Robot's Chance")
         try:
             src , dst , attk = get_best_move(fen_string)
-            src = "P"+src 
-            dst = "P"+dst
-            s.sendall (f'{src},{dst},{attk}') # Need to send point like P1,P2,P3
+            s.sendall (b'1,5,0') # Need to send point like P1,P2,P3
             data = s.recv (1024)
             print('Received ' , repr(data))
             print("Socket Communication Successful")
@@ -34,7 +32,7 @@ def play(fen_string):
             human_move = True
             time.sleep(2)
         except socket.error as err:
-            print("ERROR :: Socket Communication")
+            print("ERROR in play():: ", err)
             # Handle the error gracefully, maybe retry or log the error
 
     if human_move:
@@ -67,7 +65,7 @@ def get_best_move(fen_string):
         print("Source square:", source, "Destination square:", destination)
         return source, destination, attack
     except Exception as e:
-        print("ERROR :: ",e)
+        print("ERROR in get_move():: ",e)
         print("PRESS SPACE TO CONTINUE")
         raise e
 
@@ -86,7 +84,10 @@ def main(args=None):
     while(True):
         # Obtain the FEN string from fen.txt file
         filename = "../saved_files/fen.txt"
-        fen_string = read_string_from_file(filename)
+        try:
+            fen_string = read_string_from_file(filename)
+        except Exception:
+             print("Can't Read fEN String")
         # print("String read from file:", fen_string)
 
         if(keyboard.is_pressed('space')):
