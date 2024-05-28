@@ -7,7 +7,7 @@ import json
 import time
 
 # Load the model
-model = get_roboflow_model(model_id="chess-piece-detection-g4beu/1", api_key="lqjtws4tAIDvXCdtlMzH")
+model = get_roboflow_model(model_id="chess-piece-detection-2ektl/1", api_key="HJvYKNeTxx2SYy6MqYVL")
 
 # Define NMS parameters
 conf_thresh = 0.50  # Confidence threshold
