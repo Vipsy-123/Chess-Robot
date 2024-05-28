@@ -1,66 +1,78 @@
 [
     {
-        "detection_id": "625858b1-b1dd-4108-916d-1fd505fe6ff8",
+        "detection_id": "5a307804-3a59-4f10-a378-7be186b7cf8f",
         "class_name": "5",
         "class_id": 7,
         "bounding_box": {
-            "x": 618.0,
-            "y": 380.5,
-            "width": 68.0,
-            "height": 89.0
+            "x": 618.5,
+            "y": 380.0,
+            "width": 67.0,
+            "height": 90.0
         },
-        "confidence": 0.8991252779960632
+        "confidence": 0.910176157951355
     },
     {
-        "detection_id": "816ca73e-985d-4056-85ad-34006b8a2796",
+        "detection_id": "c876418e-0cac-467f-98cd-ad416726171c",
         "class_name": "12",
         "class_id": 3,
         "bounding_box": {
-            "x": 62.0,
-            "y": 46.0,
-            "width": 68.0,
-            "height": 92.0
+            "x": 62.5,
+            "y": 45.5,
+            "width": 67.0,
+            "height": 91.0
         },
-        "confidence": 0.8713201880455017
+        "confidence": 0.8699434995651245
     },
     {
-        "detection_id": "95844f11-5bb8-4afd-a64b-d8877c177832",
-        "class_name": "10",
-        "class_id": 1,
-        "bounding_box": {
-            "x": 159.5,
-            "y": 445.5,
-            "width": 43.0,
-            "height": 63.0
-        },
-        "confidence": 0.8657048940658569
-    },
-    {
-        "detection_id": "cdbe7581-de13-42bc-9c8b-1f8fb69d2007",
-        "class_name": "7",
-        "class_id": 9,
-        "bounding_box": {
-            "x": 67.5,
-            "y": 445.0,
-            "width": 61.0,
-            "height": 86.0
-        },
-        "confidence": 0.8652356863021851
-    },
-    {
-        "detection_id": "a1bf4c9f-5cdb-4c15-a40d-7d09a7e73c7f",
+        "detection_id": "85e89022-ff9c-44da-b957-88e0ce6d1eb4",
         "class_name": "3",
         "class_id": 5,
         "bounding_box": {
             "x": 606.5,
-            "y": 152.5,
+            "y": 153.0,
             "width": 73.0,
-            "height": 113.0
+            "height": 114.0
         },
-        "confidence": 0.8641476631164551
+        "confidence": 0.8675457239151001
     },
     {
-        "detection_id": "f073f2e7-b7c1-45fb-9acd-bb976715c95e",
+        "detection_id": "79dccc31-b1a9-4a75-b699-fa4e6f55c530",
+        "class_name": "7",
+        "class_id": 9,
+        "bounding_box": {
+            "x": 67.5,
+            "y": 444.5,
+            "width": 61.0,
+            "height": 85.0
+        },
+        "confidence": 0.8659554719924927
+    },
+    {
+        "detection_id": "0275ce56-a63c-40c6-910c-aa167e4c6dae",
+        "class_name": "10",
+        "class_id": 1,
+        "bounding_box": {
+            "x": 159.0,
+            "y": 445.0,
+            "width": 42.0,
+            "height": 62.0
+        },
+        "confidence": 0.864532470703125
+    },
+    {
+        "detection_id": "e0937407-27ac-4d30-8e7c-4537813f079d",
+        "class_name": "10",
+        "class_id": 1,
+        "bounding_box": {
+            "x": 158.5,
+            "y": 61.0,
+            "width": 53.0,
+            "height": 90.0
+        },
+        "confidence": 0.8620935082435608
+    },
+    {
+        "detection_id": "bb211131-0a1d-4c32-94a9-5aad87aa13c0",
         "class_name": "12",
         "class_id": 3,
         "bounding_box": {
@@ -69,22 +81,10 @@
             "width": 63.0,
             "height": 74.0
         },
-        "confidence": 0.8611000776290894
+        "confidence": 0.8584996461868286
     },
     {
-        "detection_id": "176b03e5-90ec-430f-9bca-f5c5cbb39a2c",
-        "class_name": "10",
-        "class_id": 1,
-        "bounding_box": {
-            "x": 158.5,
-            "y": 61.0,
-            "width": 51.0,
-            "height": 90.0
-        },
-        "confidence": 0.859359860420227
-    },
-    {
-        "detection_id": "927405cc-d7bc-44c9-90ee-c88149606d50",
+        "detection_id": "27a7e5d9-654e-4fd5-a320-0794387d4977",
         "class_name": "10",
         "class_id": 1,
         "bounding_box": {
@@ -93,22 +93,10 @@
             "width": 41.0,
             "height": 54.0
         },
-        "confidence": 0.8522391319274902
+        "confidence": 0.8509666919708252
     },
     {
-        "detection_id": "8c062239-db21-4410-882b-2d5fffcc1e6e",
-        "class_name": "10",
-        "class_id": 1,
-        "bounding_box": {
-            "x": 149.5,
-            "y": 139.5,
-            "width": 47.0,
-            "height": 85.0
-        },
-        "confidence": 0.848414421081543
-    },
-    {
-        "detection_id": "8ed89a12-ccf9-4bfe-9964-a43ca9ecccb1",
+        "detection_id": "3d440b73-b782-4de4-a9d3-7211c9ccdf03",
         "class_name": "9",
         "class_id": 11,
         "bounding_box": {
@@ -117,46 +105,46 @@
             "width": 75.0,
             "height": 108.0
         },
-        "confidence": 0.8475742936134338
+        "confidence": 0.8493918776512146
     },
     {
-        "detection_id": "7681cbbb-6d03-419a-8ec3-2af8ed0872fb",
-        "class_name": "9",
-        "class_id": 11,
-        "bounding_box": {
-            "x": 57.0,
-            "y": 522.0,
-            "width": 74.0,
-            "height": 74.0
-        },
-        "confidence": 0.8316560983657837
-    },
-    {
-        "detection_id": "b3b73624-4347-4162-885b-0c809e24a720",
+        "detection_id": "9a040ded-4275-44ab-bd8c-fe7b97bb9381",
         "class_name": "10",
         "class_id": 1,
         "bounding_box": {
-            "x": 162.0,
-            "y": 215.5,
-            "width": 40.0,
-            "height": 81.0
+            "x": 149.5,
+            "y": 139.5,
+            "width": 47.0,
+            "height": 85.0
         },
-        "confidence": 0.8308393955230713
+        "confidence": 0.8485223054885864
     },
     {
-        "detection_id": "8b46f179-6c2c-4e39-a185-08c62a92998d",
-        "class_name": "7",
-        "class_id": 9,
+        "detection_id": "b999d1fe-07f3-48f8-9504-512bd086947e",
+        "class_name": "9",
+        "class_id": 11,
         "bounding_box": {
-            "x": 68.5,
-            "y": 209.5,
-            "width": 63.0,
-            "height": 109.0
+            "x": 56.5,
+            "y": 521.5,
+            "width": 73.0,
+            "height": 73.0
         },
-        "confidence": 0.829670250415802
+        "confidence": 0.832181453704834
     },
     {
-        "detection_id": "d4ac0257-501c-4ff2-8627-f84397a704d9",
+        "detection_id": "caf8305a-cffd-4c50-bdb5-9738abce6e6e",
+        "class_name": "2",
+        "class_id": 4,
+        "bounding_box": {
+            "x": 623.0,
+            "y": 298.0,
+            "width": 82.0,
+            "height": 124.0
+        },
+        "confidence": 0.8296002745628357
+    },
+    {
+        "detection_id": "15f278f4-7bb4-4bba-a342-9ac71cc5af73",
         "class_name": "10",
         "class_id": 1,
         "bounding_box": {
@@ -165,10 +153,22 @@
             "width": 40.0,
             "height": 69.0
         },
-        "confidence": 0.8273111581802368
+        "confidence": 0.8289686441421509
     },
     {
-        "detection_id": "202927dc-a3f4-4bc9-b1d5-fc80171c61cc",
+        "detection_id": "0102d962-2b10-43ed-8a8a-e36ecf1fd8fa",
+        "class_name": "10",
+        "class_id": 1,
+        "bounding_box": {
+            "x": 162.5,
+            "y": 215.5,
+            "width": 39.0,
+            "height": 81.0
+        },
+        "confidence": 0.8285637497901917
+    },
+    {
+        "detection_id": "7db19b90-0ba1-46af-aff5-0d7fa3f046e2",
         "class_name": "10",
         "class_id": 1,
         "bounding_box": {
@@ -177,22 +177,10 @@
             "width": 43.0,
             "height": 58.0
         },
-        "confidence": 0.8272556066513062
+        "confidence": 0.8264884948730469
     },
     {
-        "detection_id": "1313f183-5033-427a-b24e-7070cf59590c",
-        "class_name": "1",
-        "class_id": 0,
-        "bounding_box": {
-            "x": 608.0,
-            "y": 446.0,
-            "width": 60.0,
-            "height": 82.0
-        },
-        "confidence": 0.8257588148117065
-    },
-    {
-        "detection_id": "36bc58ca-8d93-4c1e-83e2-b346e0104fcd",
+        "detection_id": "d918ee40-9511-4835-a6ef-af406ced6006",
         "class_name": "6",
         "class_id": 8,
         "bounding_box": {
@@ -201,82 +189,94 @@
             "width": 70.0,
             "height": 75.0
         },
-        "confidence": 0.8217938542366028
+        "confidence": 0.8257187604904175
     },
     {
-        "detection_id": "0b791110-d0e1-436f-bca6-465aa3692549",
-        "class_name": "2",
-        "class_id": 4,
+        "detection_id": "03f1a92a-5942-4049-b5b3-27b1b17791f0",
+        "class_name": "1",
+        "class_id": 0,
         "bounding_box": {
-            "x": 622.0,
-            "y": 298.5,
-            "width": 82.0,
-            "height": 125.0
+            "x": 607.5,
+            "y": 445.5,
+            "width": 59.0,
+            "height": 83.0
         },
-        "confidence": 0.8196293115615845
+        "confidence": 0.8208301663398743
     },
     {
-        "detection_id": "0beaf8af-b2c2-41bd-b8fe-65230619187d",
-        "class_name": "3",
-        "class_id": 5,
-        "bounding_box": {
-            "x": 611.0,
-            "y": 536.0,
-            "width": 70.0,
-            "height": 72.0
-        },
-        "confidence": 0.8188509941101074
-    },
-    {
-        "detection_id": "421e5dcd-4cc1-4a59-9287-97060a71cd8c",
+        "detection_id": "8073eaf3-9e0e-4b35-8c5d-c46b8ed4b058",
         "class_name": "4",
         "class_id": 6,
         "bounding_box": {
-            "x": 529.5,
-            "y": 85.0,
-            "width": 51.0,
-            "height": 92.0
+            "x": 530.0,
+            "y": 84.5,
+            "width": 50.0,
+            "height": 91.0
         },
-        "confidence": 0.8175208568572998
+        "confidence": 0.8202202320098877
     },
     {
-        "detection_id": "f4f68519-21a8-4d95-93cd-dae5c543791d",
+        "detection_id": "1c2a54ed-a9d2-4afc-85c3-bf9693332968",
+        "class_name": "6",
+        "class_id": 8,
+        "bounding_box": {
+            "x": 372.5,
+            "y": 58.0,
+            "width": 59.0,
+            "height": 116.0
+        },
+        "confidence": 0.8140009641647339
+    },
+    {
+        "detection_id": "bad0f504-8d84-4134-9fe8-bb926a0ddd77",
+        "class_name": "7",
+        "class_id": 9,
+        "bounding_box": {
+            "x": 68.5,
+            "y": 209.5,
+            "width": 63.0,
+            "height": 107.0
+        },
+        "confidence": 0.813041090965271
+    },
+    {
+        "detection_id": "acecd4d1-39fc-4473-99b1-7946358050ed",
         "class_name": "4",
         "class_id": 6,
         "bounding_box": {
             "x": 528.5,
-            "y": 235.5,
+            "y": 235.0,
             "width": 45.0,
-            "height": 75.0
+            "height": 74.0
         },
-        "confidence": 0.8092530369758606
+        "confidence": 0.80846107006073
     },
     {
-        "detection_id": "5eae3be4-6b77-4a56-a097-f2b66b11537d",
-        "class_name": "4",
-        "class_id": 6,
+        "detection_id": "7787c52a-176f-4638-ad6b-89b871c0b348",
+        "class_name": "3",
+        "class_id": 5,
         "bounding_box": {
-            "x": 534.5,
-            "y": 522.0,
-            "width": 49.0,
-            "height": 70.0
+            "x": 611.0,
+            "y": 535.5,
+            "width": 68.0,
+            "height": 71.0
         },
-        "confidence": 0.8067030310630798
+        "confidence": 0.8083452582359314
     },
     {
-        "detection_id": "7dd6cf23-c2d7-4bc6-b6d3-9dd28d404c79",
+        "detection_id": "904f20f0-3333-4fe7-a2a1-0a8c3aa34d8c",
         "class_name": "4",
         "class_id": 6,
         "bounding_box": {
             "x": 533.5,
-            "y": 165.5,
+            "y": 165.0,
             "width": 43.0,
-            "height": 71.0
+            "height": 72.0
         },
-        "confidence": 0.8050199151039124
+        "confidence": 0.8034446239471436
     },
     {
-        "detection_id": "0c277e60-cc56-4972-9276-253e5cb55407",
+        "detection_id": "1641f76b-0ba2-4540-b2bc-43671a7b9b80",
         "class_name": "4",
         "class_id": 6,
         "bounding_box": {
@@ -285,34 +285,46 @@
             "width": 44.0,
             "height": 62.0
         },
-        "confidence": 0.7998450994491577
+        "confidence": 0.8022825121879578
     },
     {
-        "detection_id": "9f0f513f-061e-48cf-923c-95aa3ee9d6d6",
-        "class_name": "4",
-        "class_id": 6,
-        "bounding_box": {
-            "x": 530.5,
-            "y": 605.5,
-            "width": 47.0,
-            "height": 55.0
-        },
-        "confidence": 0.7923376560211182
-    },
-    {
-        "detection_id": "a6bbd5c9-c531-4b13-b91c-a8c270018318",
+        "detection_id": "0c31c5a0-7b08-47d1-b5f7-3472b60dbb9e",
         "class_name": "4",
         "class_id": 6,
         "bounding_box": {
             "x": 531.0,
-            "y": 310.0,
+            "y": 605.5,
             "width": 46.0,
-            "height": 70.0
+            "height": 55.0
         },
-        "confidence": 0.7913002371788025
+        "confidence": 0.7987478375434875
     },
     {
-        "detection_id": "aee32a54-f221-455b-95ec-513a0518478c",
+        "detection_id": "a6ebe24b-41ec-4933-b62c-56c920ddf91a",
+        "class_name": "4",
+        "class_id": 6,
+        "bounding_box": {
+            "x": 534.0,
+            "y": 521.5,
+            "width": 48.0,
+            "height": 69.0
+        },
+        "confidence": 0.7979542016983032
+    },
+    {
+        "detection_id": "7c973b71-08ee-438f-96ac-10ccc74074af",
+        "class_name": "4",
+        "class_id": 6,
+        "bounding_box": {
+            "x": 531.0,
+            "y": 309.5,
+            "width": 46.0,
+            "height": 69.0
+        },
+        "confidence": 0.7937625646591187
+    },
+    {
+        "detection_id": "7564aa6b-8127-4c36-b84d-9708e651d8ad",
         "class_name": "4",
         "class_id": 6,
         "bounding_box": {
@@ -321,58 +333,46 @@
             "width": 45.0,
             "height": 69.0
         },
-        "confidence": 0.7882421016693115
+        "confidence": 0.790302038192749
     },
     {
-        "detection_id": "9ba1c653-c8e5-40c3-8651-d71c831bb7d1",
+        "detection_id": "e7ae14ae-aef2-4614-9ba3-9593693db5ee",
         "class_name": "11",
         "class_id": 2,
         "bounding_box": {
-            "x": 75.5,
-            "y": 288.0,
-            "width": 77.0,
-            "height": 128.0
+            "x": 75.0,
+            "y": 288.5,
+            "width": 78.0,
+            "height": 127.0
         },
-        "confidence": 0.7798724174499512
+        "confidence": 0.7588587403297424
     },
     {
-        "detection_id": "a6da5c80-2681-4b27-98b5-4bb7097b2cfd",
+        "detection_id": "04c5364a-bdc8-4d30-8dea-459a3a626fe5",
         "class_name": "8",
         "class_id": 10,
         "bounding_box": {
             "x": 72.0,
-            "y": 372.0,
+            "y": 372.5,
             "width": 72.0,
-            "height": 104.0
+            "height": 105.0
         },
-        "confidence": 0.7560020685195923
+        "confidence": 0.7373353242874146
     },
     {
-        "detection_id": "0074526d-5dfa-4c8f-b82a-920dd5225ea5",
+        "detection_id": "3815ccae-ef78-4060-b614-18c7f42c66f8",
         "class_name": "6",
         "class_id": 8,
         "bounding_box": {
-            "x": 373.0,
-            "y": 57.5,
-            "width": 58.0,
-            "height": 115.0
-        },
-        "confidence": 0.7522753477096558
-    },
-    {
-        "detection_id": "f266adc5-a4d5-428b-9fb1-7bb25ef16ae1",
-        "class_name": "6",
-        "class_id": 8,
-        "bounding_box": {
-            "x": 610.0,
+            "x": 609.5,
             "y": 49.5,
-            "width": 64.0,
+            "width": 63.0,
             "height": 99.0
         },
-        "confidence": 0.6574312448501587
+        "confidence": 0.6618629097938538
     },
     {
-        "detection_id": "af95344f-c615-4a9d-9cd3-cce10b355097",
+        "detection_id": "02366e8a-6287-432c-8c4e-6c86d7b8bbf3",
         "class_name": "1",
         "class_id": 0,
         "bounding_box": {
@@ -381,6 +381,6 @@
             "width": 63.0,
             "height": 100.0
         },
-        "confidence": 0.5980740189552307
+        "confidence": 0.5545130968093872
     }
 ]
