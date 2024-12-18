@@ -1,63 +1,197 @@
+import chess
+import chess.svg
+import wand.image
+import json
 import cv2
 import numpy as np
+import os
+import time
+from typing import Dict, Tuple, Optional
 
-# Read the image
-image = cv2.imread('Chess9.jpg')
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+class ChessboardProcessor :
+    """
+    A class to process chess moves based on known states and legal moves.
+    """
+    # Piece mapping dictionary
+    PIECE_MAPPING = {
+        "1": "b", "2": "k", "3": "n", "4": "p", "5": "q", "6": "r",
+        "7": "B", "8": "K", "9": "N", "10": "P", "11": "Q", "12": "R"
+    }
+    
+    def __init__(self, base_path: str = "../saved_files"):
+        """
+        Initialize the StatefulChessboardProcessor.
+        
+        Args:
+            base_path (str): Base path for saved files
+        """
+        self.base_path = base_path
+        self.centers_path = f"{base_path}/chessboard_centers.json"
+        self.predictions_path = f"{base_path}/predictions.json"
+        self.occupied_pos_path = f"{base_path}/occupied_positions.json"
+        self.fen_path = f"{base_path}/fen.txt"
+        self.svg_path = f"{base_path}/chessboard.svg"
+        self.png_path = f"{base_path}/chessboard.png"
+         # Class-level constants
+        self.EMPTY_BOARD_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        
+        self.board = chess.Board()  # Start with the standard chess configuration
+        self.occupied_positions = self.initialize_occupied_positions_from_fen(self.EMPTY_BOARD_FEN)
+    
+    @staticmethod
+    def _file_to_index(file: str) -> int:
+        """Convert file letter to 0-indexed integer."""
+        return ord(file) - ord('a')
+    
+    @staticmethod
+    def _rank_to_index(rank: str) -> int:
+        """Convert rank number to 0-indexed integer."""
+        return int(rank) - 1
+    
+    @staticmethod
+    def load_json_data(file_path: str) -> Dict:
+        """Load JSON data from file with error handling."""
+        try:
+            with open(file_path) as json_file:
+                return json.load(json_file)
+        except (json.JSONDecodeError, FileNotFoundError) as e:
+            print(f"Error loading JSON from {file_path}: {e}")
+            return {}
+    
+    def save_json_data(self, data: Dict, file_path: str) -> None:
+        """Save JSON data to file."""
+        with open(file_path, 'w') as file:
+            json.dump(data, file)
+    
+    def save_string_to_file(self, string_data: str, file_path: str) -> None:
+        """Save string data to file."""
+        with open(file_path, 'w') as file:
+            file.write(string_data)
+    
+    def find_closest_square(self, pred_x: float, pred_y: float, 
+                           board_centers: Dict) -> Optional[str]:
+        """Find the closest chess square for given coordinates."""
+        for square, (square_x, square_y) in board_centers.items():
+            if (abs(square_x - pred_x) <= self.PREDICTION_THRESHOLD and 
+                abs(square_y - pred_y) <= self.PREDICTION_THRESHOLD):
+                return square
+        return None
+    
+    def initialize_occupied_positions_from_fen(self,fen: str) -> Dict[str, int]:
+        """
+        Initialize the occupied positions dictionary from a FEN string.
 
-# Use Canny edge detector
-edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+        Args:
+            fen (str): The FEN string representing the chessboard state.
 
-# Find contours of the chessboard grid
-contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        Returns:
+            Dict[str, int]: A dictionary mapping squares to 1 (occupied) or 0 (unoccupied).
+        """
+        occupied_positions = {f"{file}{rank}": 0 for file in 'abcdefgh' for rank in '12345678'}
+        rows = fen.split()[0].split('/')  # Get the board rows from FEN
+        
+        # Iterate over the rows in reverse because FEN starts from rank 8
+        for rank_idx, row in enumerate(reversed(rows)):
+            file_idx = 0
+            for char in row:
+                if char.isdigit():
+                    # Empty squares
+                    file_idx += int(char)
+                else:
+                    # Occupied square
+                    file = chr(ord('a') + file_idx)
+                    rank = str(rank_idx + 1)
+                    square = f"{file}{rank}"
+                    occupied_positions[square] = 1
+                    file_idx += 1
+        
+        return occupied_positions
+    
+    def update_board_from_predictions(self) -> None:
+        """Update the chess board based on current predictions."""
+        # Load latest data
+        board_centers = self.load_json_data(self.centers_path)
+        predictions = self.load_json_data(self.predictions_path)
+        
+        # Reset board and occupied positions
+        self.board = chess.Board(fen=self.EMPTY_BOARD_FEN)
+        self.occupied_positions = self._initialize_occupied_positions()
+        
+        # Process each prediction
+        for prediction in predictions:
+            pred_x = prediction["bounding_box"]["x"]
+            pred_y = prediction["bounding_box"]["y"]
+            
+            closest_square = self.find_closest_square(pred_x, pred_y, board_centers)
+            
+            if closest_square:
+                # Update board with piece
+                file_idx = self._file_to_index(closest_square[0])
+                rank_idx = self._rank_to_index(closest_square[1])
+                piece_symbol = self.PIECE_MAPPING[prediction["class_name"]]
+                piece = chess.Piece.from_symbol(piece_symbol)
+                self.board.set_piece_at(chess.square(file_idx, rank_idx), piece)
+                
+                # Mark square as occupied
+                self.occupied_positions[closest_square] = 1
+    
 
-# Calculate intersection points from contours
-intersections = []
-for cnt in contours:
-    for i in range(len(cnt)):
-        for j in range(i + 1, len(cnt)):
-            pt1 = cnt[i][0]
-            pt2 = cnt[j][0]
-            if pt1[0] != pt2[0] and pt1[1] != pt2[1]:  # Ensure points are not on the same row or column
-                intersections.append((pt1[0], pt2[1]))
+    def save_board_state(self) -> None:
+        """Save current board state to files."""
+        # Save occupied positions
+        self.save_json_data(self.occupied_positions, self.occupied_pos_path)
+        
+        # Save FEN string
+        self.save_string_to_file(self.board.fen(), self.fen_path)
 
-# Convert intersection points to numpy array
-intersections = np.array(intersections)
+    def generate_board_visuals(self) -> None:
+        """Generate and save visual representations of the board."""
+        board_svg = chess.svg.board(board=self.board, size=400, coordinates=False)
+        with open(self.svg_path, "w") as svg_file:
+            svg_file.write(board_svg)
+        with wand.image.Image() as image:
+            image.read(blob=board_svg.encode('utf-8'), format="svg")
+            png_image = image.make_blob("png32")
+        with open(self.png_path, "wb") as out:
+            out.write(png_image)
 
-# Manually select the bottom two corners
-bottom_corners = np.array([
-    [np.min(intersections[:, 0]), np.max(intersections[:, 1])],   # Bottom-left corner
-    [np.max(intersections[:, 0]), np.max(intersections[:, 1])]   # Bottom-right corner
-])
+    def display_board(self) -> None:
+        """Display the current board state."""
+        img = cv2.imread(self.png_path)
+        cv2.imshow('Board', img)
+        cv2.waitKey(1000)
 
-# Estimate the top two corners based on the bottom ones
-bottom_left_x, bottom_left_y = bottom_corners[0]
-bottom_right_x, bottom_right_y = bottom_corners[1]
+    def process_single_frame(self) -> None:
+        """Simulate a single frame processing of moves."""
+        try:
+            # Example of updating board manually
+            self.update_board_from_predictions()
+            self.save_board_state()
+            print("FEN:", self.board.fen())
 
-# Define a fixed vertical distance between top and bottom corners
-vertical_distance = 600
+            self.generate_board_visuals()
+            self.display_board()
+            # self.cleanup_temp_files()
+        except Exception as e:
+            print(f"Error processing frame: {e}")
+        
+    def run(self) -> None:
+        """Main processing loop."""
+        print("Starting chess board processing...")
+        while True:
+            try:
+                self.process_single_frame()
+                time.sleep(1)
+            except KeyboardInterrupt:
+                print("\nStopping chess board processing...")
+                break
+            except Exception as e:
+                print(f"Error in main loop: {e}")
+                time.sleep(1)
 
-# Calculate the estimated top corners
-estimated_top_left_corner = (bottom_left_x + 150, bottom_left_y - vertical_distance)
-estimated_top_right_corner = (bottom_right_x - 200, bottom_right_y - vertical_distance)
+def main():
+    processor = ChessboardProcessor()
+    processor.run()
 
-# Define the source and destination points for perspective transformation
-src_pts = np.array([bottom_corners[0], bottom_corners[1], estimated_top_left_corner, estimated_top_right_corner], dtype=np.float32)
-dst_pts = np.array([[0, 400], [400, 400],[0, 0], [400, 0], ], dtype=np.float32)
-
-# Calculate the perspective transformation matrix
-transform_matrix = cv2.getPerspectiveTransform(src_pts, dst_pts)
-
-# Apply the perspective transformation
-warped_image = cv2.warpPerspective(image, transform_matrix, (400, 400))
-
-# Resize the warped image to 512x512
-resized_image = cv2.resize(warped_image, (512, 512))
-
-# Save the resized image as 'board.jpg'
-cv2.imwrite('board.jpg', resized_image)
-
-# Display the resized image
-cv2.imshow('Resized Warped Image', resized_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+if __name__ == "__main__":
+    main()

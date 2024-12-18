@@ -1,4 +1,3 @@
-
 import cv2
 from inference.models.utils import get_roboflow_model
 from inference.core.nms import w_np_non_max_suppression
@@ -7,11 +6,11 @@ import json
 import time
 
 # Load the model
-model = get_roboflow_model(model_id="chess-piece-detection-2ektl/1", api_key="HJvYKNeTxx2SYy6MqYVL")
+model = get_roboflow_model(model_id="che-jqbyk/2", api_key="5wYIwfVPqdeD3B9yZMfU")
 
 # Define NMS parameters
-conf_thresh = 0.50  # Confidence threshold
-iou_thresh = 0.50   # IOU threshold 
+conf_thresh = 0.30  # Confidence threshold
+iou_thresh = 0.50   # IOU threshold
 max_detections = 32 # Maximum number of detections
 
 # Define a loop for continuous inference
@@ -35,47 +34,59 @@ while True:
         object_count = 0
         existing_predictions = []
         for prediction in results.predictions:
-
-            # These are some adjustments done inorder to cope up with Chess pieces height difference
-            if( prediction.class_name == "3" or prediction.class_name == "9" or prediction.class_name == "4" or prediction.class_name == "10" or prediction.class_name == "1" or prediction.class_name == "7"):
-                prediction_dict = {
-                    "detection_id": prediction.detection_id,
-                    "class_name": prediction.class_name,
-                    "class_id": prediction.class_id,
-                    "bounding_box": {
-                        "x": prediction.x,
-                        "y": prediction.y + 15,
-                        "width": prediction.width,
-                        "height": prediction.height
-                    },
-                    "confidence": prediction.confidence
-                }
-            elif(prediction.class_name == "2" or prediction.class_name == "5" or prediction.class_name == "8" or prediction.class_name == "11"):
-                prediction_dict = {
-                    "detection_id": prediction.detection_id,
-                    "class_name": prediction.class_name,
-                    "class_id": prediction.class_id,
-                    "bounding_box": {
-                        "x": prediction.x,
-                        "y": prediction.y + 25,
-                        "width": prediction.width,
-                        "height": prediction.height
-                    },
-                    "confidence": prediction.confidence
-                }
-            else:
-                prediction_dict = {
-                    "detection_id": prediction.detection_id,
-                    "class_name": prediction.class_name,
-                    "class_id": prediction.class_id,
-                    "bounding_box": {
-                        "x": prediction.x,
-                        "y": prediction.y,
-                        "width": prediction.width,
-                        "height": prediction.height
-                    },
-                    "confidence": prediction.confidence
-                }
+            if prediction.confidence > conf_thresh :
+                if(prediction.class_name == "1" or prediction.class_name == "7"):
+                    prediction_dict = {
+                        "detection_id": prediction.detection_id,
+                        "class_name": prediction.class_name,
+                        "class_id": prediction.class_id,
+                        "bounding_box": {
+                            "x": prediction.x,
+                            "y": prediction.y + 25,
+                            "width": prediction.width,
+                            "height": prediction.height
+                        },
+                        "confidence": prediction.confidence
+                    }
+                elif (prediction.class_name == "6" or prediction.class_name == "3"):
+                    prediction_dict = {
+                        "detection_id": prediction.detection_id,
+                        "class_name": prediction.class_name,
+                        "class_id": prediction.class_id,
+                        "bounding_box": {
+                            "x": prediction.x,
+                            "y": prediction.y + 30,
+                            "width": prediction.width,
+                            "height": prediction.height
+                        },
+                        "confidence": prediction.confidence
+                    }
+                elif(prediction.class_name == "2" or prediction.class_name == "5" or prediction.class_name == "8" or prediction.class_name == "11" or  prediction.class_name == "3" or prediction.class_name == "9" or prediction.class_name == "10" or prediction.class_name == "4"):
+                    prediction_dict = {
+                        "detection_id": prediction.detection_id,
+                        "class_name": prediction.class_name,
+                        "class_id": prediction.class_id,
+                        "bounding_box": {
+                            "x": prediction.x,
+                            "y": prediction.y + 12,
+                            "width": prediction.width,
+                            "height": prediction.height
+                        },
+                        "confidence": prediction.confidence
+                    }
+                else:
+                    prediction_dict = {
+                        "detection_id": prediction.detection_id,
+                        "class_name": prediction.class_name,
+                        "class_id": prediction.class_id,
+                        "bounding_box": {
+                            "x": prediction.x,
+                            "y": prediction.y,
+                            "width": prediction.width,
+                            "height": prediction.height
+                        },
+                        "confidence": prediction.confidence
+                    }
             # # Check if a similar prediction already exists within a threshold around x and y coordinates
             # should_add_prediction = True
             # for existing_prediction in existing_predictions:
@@ -86,6 +97,7 @@ while True:
             # if should_add_prediction:
             
             #     existing_predictions.append(prediction_dict)
+            
             predictions_data.append(prediction_dict)
             object_count += 1
 

@@ -41,7 +41,8 @@ Notes:
 To measure the speed of several builds of Stockfish, use one of these applications:
 * All OS:
   * [pyshbench](https://github.com/hazzl/pyshbench): Latest release [pyshbench](https://github.com/hazzl/pyshbench/archive/master.zip)
-  * bash script `bench_parallel.sh` (run `bash bench_parallel.sh` for the help):
+  * bash script `bench_parallel.sh` (run `bash bench_parallel.sh` for the help)  
+    it might be that you have to install gawk as well on your system to not get syntax errors.
 
     <details><summary>Click to view</summary>
     
@@ -121,6 +122,39 @@ To measure the speed of several builds of Stockfish, use one of these applicatio
     ```
     </details>
 
+    <details><summary>Bench two git branches with bench_parallel</summary>
+
+    ```bash
+    #!/bin/bash
+
+    if [ "$#" -ne 5 ]; then
+    echo "Usage: $0 branch1 branch2 depth runs compile_flags"
+    exit 1
+    fi
+
+    BRANCH1=$1
+    BRANCH2=$2
+    DEPTH=$3
+    RUNS=$4
+    COMPILE_FLAGS=$5
+
+    set -e
+
+    echo "Switching to $BRANCH1 and building..."
+    git switch $BRANCH1
+    make clean
+    make -j profile-build EXE=stockfish-$BRANCH1 $COMPILE_FLAGS
+
+    echo "Switching to $BRANCH2 and building..."
+    git switch $BRANCH2
+    make clean
+    make -j profile-build EXE=stockfish-$BRANCH2 $COMPILE_FLAGS
+
+    echo "Running bench_parallel.sh with stockfish-$BRANCH1 and stockfish-$BRANCH2..."
+    ./bench_parallel.sh ./stockfish-$BRANCH1 ./stockfish-$BRANCH2 $DEPTH $RUNS
+    ```
+    </details>
+
 * Windows only:
   * [FishBench](https://github.com/zardav/FishBench): Latest release [Fishbench v6.0](https://github.com/zardav/FishBench/releases/download/v6.0/FishBench.zip)
   * [Buildtester](http://software.farseer.org/): Latest release [Buildtester 1.4.7.0](http://software.farseer.org/Software/BuildTester.7z)
@@ -142,7 +176,7 @@ Feedback on this branch is welcome! Here are some git commands for people intere
 2. After switching to the cluster branch as above, see the README.md for detailed instructions on how to compile and run the branch. TL;DR:
     ```bash
     make clean
-    make -j ARCH=x86-64-avx2 COMPILER=mpic++ build
+    make -j ARCH=x86-64-avx2 COMPCXX=mpic++ build
     mpirun -np 4 ./stockfish bench
     ```
 

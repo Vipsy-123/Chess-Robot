@@ -1,6 +1,6 @@
 ## General
 
-`make target ARCH=arch [COMP=compiler] [COMPCXX=cxx]`
+`make target [ARCH=arch] [COMP=compiler] [COMPCXX=cxx]`
 
 ### Targets
 
@@ -76,6 +76,10 @@ make -j build ARCH=x86-32
 
 For experienced users looking for performance:
 
+```bash
+# Providing no ARCH so it will try to find the best ARCH for you
+make -j profile-build
+```
 ```bash
 make -j profile-build ARCH=x86-64-bmi2
 ```

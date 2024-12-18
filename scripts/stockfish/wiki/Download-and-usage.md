@@ -1,7 +1,8 @@
 ## Download Stockfish
 
-_Note: Stockfish is a [**command line program**](Stockfish-FAQ#executing-stockfish-opens-a-cmd-window). You may want to use it in your own UCI-compatible [chess GUI](#download-a-chess-gui).  
-Developers should communicate with Stockfish via the [UCI protocol](https://github.com/official-stockfish/Stockfish/wiki/UCI-&-Commands#standard-commands)._
+> [!NOTE]
+> Stockfish is a [**command line program**](Stockfish-FAQ#executing-stockfish-opens-a-cmd-window). You may want to use it in your own UCI-compatible [chess GUI](#download-a-chess-gui).  
+> Developers should communicate with Stockfish via the [UCI protocol](https://github.com/official-stockfish/Stockfish/wiki/UCI-&-Commands#standard-commands).
 
 ### Get started
 
@@ -32,16 +33,21 @@ Binaries are also available on GitHub: https://github.com/official-stockfish/Sto
 2. Expand the Assets
 3. Download your preferred binary
 
+> [!NOTE]
+> We **only** recommend downloading from the [official GitHub releases](https://github.com/official-stockfish/Stockfish/releases?q=prerelease%3Atrue).  
+> Websites such as [Abrok](<https://abrok.eu/stockfish/>) are third parties, so we cannot guarantee the safety, reliability, and availability of those binaries because we are not responsible for them.
+
 ### Choose a binary
 
 In order of preference:
 1. x86-64-vnni512
 2. x86-64-vnni256
 3. x86-64-avx512
+   * AMD: Zen 4 and newer (e.g. Ryzen 9 7950X).
 4. x86-64-avxvnni
 5. x86-64-bmi2
    * Intel: 4th Gen and newer (e.g. i7 4770K, i5 13600K).
-   * AMD: Zen 3 and newer (e.g. Ryzen 5 5600X, Ryzen 9 7950X).
+   * AMD: Zen 3 (e.g. Ryzen 5 5600X).
 6. x86-64-avx2
    * AMD: Zen, Zen+, and Zen 2 (e.g. Ryzen 5 1600, Ryzen 5 3600).
 7. x86-64-sse41-popcnt
@@ -90,7 +96,8 @@ A chess graphical user interface allows you to interact with the engine in a use
 
 ### Online
 
-_Note: If you don't want to download a GUI, you can also use some of the available online interfaces. Keep in mind that you might not get the latest version of Stockfish, settings might be limited and speed will be slower._
+> [!NOTE]
+> If you don't want to download a GUI, you can also use some of the available online interfaces. Keep in mind that you might not get the latest version of Stockfish, settings might be limited and speed will be slower.
 
 | **[Lichess](https://lichess.org/analysis)**<br>[Change settings](#lichess) | **[Chess.com](https://www.chess.com/analysis)**<br>[Change settings](#chesscom) |
 |:---|:---|
@@ -158,7 +165,8 @@ _Note: If you don't want to download a GUI, you can also use some of the availab
 
 ## Change settings
 
-_Note: Please check our [FAQ guide](Stockfish-FAQ#optimal-settings) to set the optimal settings._
+> [!NOTE]
+> Please check our [FAQ guide](Stockfish-FAQ#optimal-settings) to set the optimal settings.
 
 ### Arena
 

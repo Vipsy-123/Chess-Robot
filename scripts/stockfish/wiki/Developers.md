@@ -129,7 +129,7 @@ Your next step is probably gonna be researching how you can open an executable i
 
 - Python: https://python-chess.readthedocs.io/en/latest/engine.html
 - NodeJS: You can follow [this guide](https://blog.logrocket.com/using-stdout-stdin-stderr-node-js/) on how to communicate with a program.
-- C++: You can try out [this wrapper](https://github.com/Disservin/fast-process-communication) for process communication.
+- C++: [Boost.Process](https://www.boost.org/doc/libs/1_64_0/doc/html/process.html) can be used for easy process communication.
 - Rust: Examine the documentation on [how to spawn a Command](https://doc.rust-lang.org/std/process/struct.Command.html).
 
 ### Limitations
@@ -165,26 +165,48 @@ Only really useful for maintainers.
 ```bash
 #!/bin/bash
 
+if ! which clang-format-18 >/dev/null; then
+    CLANG_FORMAT=clang-format
+else
+    CLANG_FORMAT=clang-format-18
+fi
+
+# Extracted from the Makefile
+SRCS=$(awk '/^SRCS = /{flag=1; sub(/^SRCS = /,""); print} /^$/{flag=0} flag && !/^SRCS = /{print}' ./src/Makefile | tr -d '\\' | xargs echo | tr ' ' '\n' | sed 's|^|./src/|')
+HEADERS=$(awk '/^HEADERS = /{flag=1; sub(/^HEADERS = /,""); print} /^$/{flag=0} flag && !/^HEADERS = /{print}' ./src/Makefile | tr -d '\\' | xargs echo | tr ' ' '\n' | sed 's|^|./src/|')
+
 while read local_ref local_sha remote_ref remote_sha; do
     if [[ "$remote_ref" == "refs/heads/master" ]]; then
+        # Check open diffs
+        if [[ -n $(git status --porcelain) ]]; then
+            echo "Please commit or stash your changes before pushing."
+            exit 1
+        fi
+
+        # Check formatting
+        if ! $CLANG_FORMAT --dry-run -Werror -style=file $SRCS $HEADERS; then
+            echo "Please run 'make format' to fix formatting issues and rebase the last commit."
+            exit 1
+        fi
+
         # Iterate through commits
         for commit in $(git rev-list --no-merges $remote_sha..$local_sha); do
-            # Get the commit message
             commit_msg=$(git log --format=%B -n 1 $commit)
 
-            # Check for the bench regex
+            # bench regex as defined in ci
+            # check for the existence of a bench in the commit message
             bench_regex='\b[Bb]ench[ :]+[1-9][0-9]{5,7}\b'
             if echo "$commit_msg" | grep -m 1 -o -x -E "$bench_regex" >/dev/null; then
                 continue
             fi
 
-            # Check for the "No functional change" regex
+            # check for the existence of "No functional change" in the commit message
             no_functional_change_regex='\b[Nn]o[[:space:]][Ff]unctional[[:space:]][Cc]hange\b'
             if echo "$commit_msg" | grep -o -x -E "$no_functional_change_regex" >/dev/null; then
                 continue
             fi
 
-            echo "Commit $commit does not contain a Bench or 'No functional change'"
+            echo "Commit $commit does not contain a Bench or 'No functional change'."
             exit 1
         done
     fi

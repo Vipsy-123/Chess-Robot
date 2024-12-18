@@ -223,7 +223,7 @@ tc 60+0.6:
  4    4.67  2.57
 ```
 
-_Note: Numbers will depend on the precise hardware. The model was verified quite accurately on fishtest see https://github.com/locutus2/Stockfish/commit/82958c97214b6d418e5bc95e3bf1961060cd6113#commitcomment-38646654_
+_Note: Numbers will depend on the precise hardware. The model was verified quite accurately on fishtest see https://github.com/locutus2/Stockfish-old/commit/82958c97214b6d418e5bc95e3bf1961060cd6113#commitcomment-38646654_
 
 ---
 
@@ -237,11 +237,60 @@ In a collection of a few million games, the longest was [902 plies](https://gith
 
 ## Win-Draw-Loss statistics of LTC games on fishtest
 
-The following graph gives information on the Win-Draw-Loss (WDL) statistics, relating them to score and move number. It answers the question 'What fraction of positions that have a given score + (move number) in fishtest LTC, have a Win or a Draw or a Loss ?'.
+The following graph gives information on the Win-Draw-Loss (WDL) statistics, relating them to score and material count. It answers the question 'What fraction of positions that have a given score (and material count) in fishtest LTC, have a Win or a Draw or a Loss ?'.
 
 [<img src="https://raw.githubusercontent.com/official-stockfish/WDL_model/master/WDL_model_summary.png" width="800">](https://raw.githubusercontent.com/official-stockfish/WDL_model/master/WDL_model_summary.png)
 
-This model is used when Stockfish provides WDL statistics during analysis with the `UCI_ShowWDL` option set to True.
+This model is used when Stockfish provides WDL statistics during analysis with the `UCI_ShowWDL` option set to True, as well as for the normalization of Stockfish's evaluation that ensures that a score of "100 centipawns" means the engine has a 50% probability to win from this position in selfplay at fishtest LTC time control. For details see the [WDL model repo](https://github.com/official-stockfish/WDL_model).
+
+---
+## Equivalent time odds and normalized game pair Elo
+
+<img src="https://github.com/user-attachments/assets/2aca2bb1-26e5-40a4-99fa-eca19a1233e9" width="800">
+
+A suitable measure to define the Elo difference between two engines is `normalized game pair Elo` as defined from the pentanomial statistics by:
+
+```python
+def normalized_game_pair_elo(row):
+    return -100 * np.log10((2 * row['pntl0'] + row['pntl1']) / (2 * row['pntl4'] + row['pntl3']))
+```
+
+It is nearly book independent, and thus a good measure of relative strength of two engines at a given TC. To express more clearly what a given strength difference implies. We use 'equivalent time odds', i.e. the TC factor needed to have equivalent strength, i.e. zero Elo difference in a match between two engines (which is independent of the definition of Elo used).
+
+We see that at STC the equivalent time odds is about 6x for SF14 vs SF17, while at LTC this time odds factor has become 16x.
+
+
+<details>
+  <summary><code>Raw data for the above graph</code></summary><br>
+
+```
+=======================================  UHO_Lichess_4852_v1 =======================================
+   engine1        tc1    engine2        tc2        elo  pntl0  pntl1  pntl2  pntl3  pntl4    ngp_Elo
+      sf17     10+0.1       sf14   10.0+0.1     165.29     10    432   6509  25598   3291     185.24
+      sf17     10+0.1       sf14   40.0+0.4      41.74    251   5110  16632  13516    331      40.25
+      sf17     10+0.1       sf14   60.0+0.6       7.47    395   7724  17826   9736    159       7.22
+      sf17     10+0.1       sf14   80.0+0.8     -17.52    569  10075  17691   7408     97     -16.88
+=======================================          noob_3moves =======================================
+   engine1        tc1    engine2        tc2        elo  pntl0  pntl1  pntl2  pntl3  pntl4    ngp_Elo
+      sf17     10+0.1       sf14   10.0+0.1     108.47      6    610  16073  16012   3139     155.43
+      sf17     10+0.1       sf14   40.0+0.4      10.85    100   3004  27471   5089    176      23.00
+      sf17     10+0.1       sf14   60.0+0.6      -4.87    165   4048  28312   3257     58     -11.33
+      sf17     10+0.1       sf14   80.0+0.8     -15.02    219   4892  28520   2184     25     -37.76
+=======================================  UHO_Lichess_4852_v1 =======================================
+   engine1        tc1    engine2        tc2        elo  pntl0  pntl1  pntl2  pntl3  pntl4    ngp_Elo
+      sf17     60+0.6       sf14   60.0+0.6     163.96      1    194   5269  29060   1316     220.87
+      sf17     60+0.6       sf14  240.0+2.4      88.09     25   2021  14134  19482    178      98.13
+      sf17     60+0.6       sf14  360.0+3.6      63.06     41   3212  16546  15938    103      69.03
+      sf17     60+0.6       sf14  480.0+4.8      46.39     72   4243  17703  13760     62      50.03
+=======================================          noob_3moves =======================================
+   engine1        tc1    engine2        tc2        elo  pntl0  pntl1  pntl2  pntl3  pntl4    ngp_Elo
+      sf17     60+0.6       sf14   60.0+0.6      71.55      0    131  22234  12279   1196     204.92
+      sf17     60+0.6       sf14  240.0+2.4      19.23      0    436  31090   4231     83     100.37
+      sf17     60+0.6       sf14  360.0+3.6      11.51      3    616  32255   2938     28      68.25
+      sf17     60+0.6       sf14  480.0+4.8       7.08      6    716  32949   2149     20      47.81
+```
+
+</details>
 
 ---
 

@@ -22,28 +22,29 @@ If no `uciok` is sent within a certain time period, the engine task will be kill
 
   ```
   > uci
-  id name Stockfish dev-20231214-c53d2ec2
-  id author the Stockfish developers (see AUTHORS file)
+    id name Stockfish 16.1
+    id author the Stockfish developers (see AUTHORS file)
 
-  option name Debug Log File type string default
-  option name Threads type spin default 1 min 1 max 1024
-  option name Hash type spin default 16 min 1 max 33554432
-  option name Clear Hash type button
-  option name Ponder type check default false
-  option name MultiPV type spin default 1 min 1 max 500
-  option name Skill Level type spin default 20 min 0 max 20
-  option name Move Overhead type spin default 10 min 0 max 5000
-  option name nodestime type spin default 0 min 0 max 10000
-  option name UCI_Chess960 type check default false
-  option name UCI_LimitStrength type check default false
-  option name UCI_Elo type spin default 1320 min 1320 max 3190
-  option name UCI_ShowWDL type check default false
-  option name SyzygyPath type string default <empty>
-  option name SyzygyProbeDepth type spin default 1 min 1 max 100
-  option name Syzygy50MoveRule type check default true
-  option name SyzygyProbeLimit type spin default 7 min 0 max 7
-  option name EvalFile type string default nn-0000000000a0.nnue
-  uciok
+    option name Debug Log File type string default
+    option name Threads type spin default 1 min 1 max 1024
+    option name Hash type spin default 16 min 1 max 33554432
+    option name Clear Hash type button
+    option name Ponder type check default false
+    option name MultiPV type spin default 1 min 1 max 256
+    option name Skill Level type spin default 20 min 0 max 20
+    option name Move Overhead type spin default 10 min 0 max 5000
+    option name nodestime type spin default 0 min 0 max 10000
+    option name UCI_Chess960 type check default false
+    option name UCI_LimitStrength type check default false
+    option name UCI_Elo type spin default 1320 min 1320 max 3190
+    option name UCI_ShowWDL type check default false
+    option name SyzygyPath type string default <empty>
+    option name SyzygyProbeDepth type spin default 1 min 1 max 100
+    option name Syzygy50MoveRule type check default true
+    option name SyzygyProbeLimit type spin default 7 min 0 max 7
+    option name EvalFile type string default nn-b1a57edbea57.nnue
+    option name EvalFileSmall type string default nn-baff1ede1f90.nnue
+    uciok
   ```
 </details>
 
@@ -70,18 +71,31 @@ List of options:
   * `Hash` `type spin default 16 min 1 max 33554432`  
     The size of the hash table in MB. It is recommended to set Hash after setting Threads.
 
+  * `MultiPV` `type spin default 1 min 1 max 500`  
+    Output the N best lines (principal variations, PVs) when searching.
+    Leave at 1 for the best performance.
+
+  * `NumaPolicy` `type string default auto`
+    Bind threads to ensure execution on a specific NUMA node. 
+    Improves performance on systems with multiple CPUs or CPUs with multiple NUMA domains. 
+    The following values can be used:
+       * `system` - gathers NUMA node information from the system (including affinities preset by the user or the GUI), for each thread binds it to a single NUMA node
+       * `none` - assumes there is 1 NUMA node, never binds threads
+       * `auto` - this is the default value, automatically selects `system` or `none` depending on the number of set threads and available NUMA nodes. Will only select `system` when the number of threads reaches a system-dependent threshold.
+       * `hardware` - gathers NUMA node information for the underlying hardware (disregards and overrides affinities preset by the user or the GUI), for each thread binds it to a single NUMA node
+       * `[[custom]]` - specify precisely the available CPUs per numa domain. ':' separates numa nodes; ',' separates cpu indices; supports "first-last" range syntax for cpu indices, for example `0-15,32-47:16-31,48-63`
+
   * `Clear Hash` `type button`  
     Clear the hash table.
 
   * `Ponder` `type check default false`  
     Let Stockfish ponder its next move while the opponent is thinking.
 
-  * `MultiPV` `type spin default 1 min 1 max 500`  
-    Output the N best lines (principal variations, PVs) when searching.
-    Leave at 1 for the best performance.
-
   * `EvalFile` `type string default nn-[SHA256 first 12 digits].nnue`  
     The name of the file of the NNUE evaluation parameters. Depending on the GUI the filename might have to include the full path to the folder/directory that contains the file. Other locations, such as the directory that contains the binary and the working directory, are also searched.
+
+  * `EvalFileSmall` `type string default nn-[SHA256 first 12 digits].nnue`
+    Same as EvalFile.
 
   * `UCI_Chess960` `type check default false`  
     An option handled by your GUI. If true, Stockfish will play Chess960.
@@ -94,7 +108,7 @@ List of options:
     Enable weaker play aiming for an Elo rating as set by `UCI_Elo`. This option overrides `Skill Level`.
 
   * `UCI_Elo` `type spin default 1320 min 1320 max 3190`  
-    If enabled by UCI_LimitStrength, aim for an engine strength of the given Elo.
+    If `UCI_LimitStrength` is enabled, it aims for an engine strength of the given Elo.
     This Elo rating has been calibrated at a time control of 60s+0.6s and anchored to CCRL 40/4.
 
   * `Skill Level` `type spin default 20 min 0 max 20`  
@@ -133,7 +147,8 @@ Usage: `position [fen <fenstring> | startpos ]  moves <move1> .... <movei>`
 
 Set up the position described in `fenstring`.  
 If the game was played from the start position the string `startpos` must be sent.  
-_Note: If this position is from a different game than the last position sent to the engine, the GUI should have sent a `ucinewgame` in between._
+> [!NOTE]
+> If this position is from a different game than the last position sent to the engine, the GUI should have sent a `ucinewgame` in between.
 
 Examples:
 ```
@@ -148,6 +163,8 @@ This is sent to the engine when the next search (started with `position` and `go
 If the GUI hasn't sent a `ucinewgame` before the first `position` command, the engine won't expect any further `ucinewgame` commands as the GUI is probably not supporting the `ucinewgame` command.  
 So the engine will not rely on this command even though all new GUIs should support it.  
 As the engine's reaction to `ucinewgame` can take some time the GUI should always send `isready` after `ucinewgame` to wait for the engine to finish its operation. The engine will respond with `readyok`.
+
+_This clears the hash and any information which was collected during the previous search._
 
 <details>
   <summary>Example</summary>
@@ -585,10 +602,9 @@ The bench command may also be used in the command line when executing Stockfish.
 | `fenFile`   | `default` | `default`, `current` or `[file path]`                     | The positions used for the bench |
 | `limitType` |  `depth`  | A [go parameter](#go) (e.g. `depth` or `nodes`) or `eval` | The type of limit                |
 
-Notes:
-
-* **String parameters are case-sensitive**. In case of invalid values of string parameters, the error is not given, and the behavior is undefined (the program does not fall back to a default value).
-* The `[file path]` may contain **one or more positions**, each on a separate line.
+> [!NOTE]
+> * **String parameters are case-sensitive**. In case of invalid values of string parameters, the error is not given, and the behavior is undefined (the program does not fall back to a default value).
+> * The `[file path]` may contain **one or more positions**, each on a separate line.
 
 
 ### `d`
@@ -697,7 +713,7 @@ Compilation settings include:  64bit AVX2 SSE41 SSSE3 SSE2 POPCNT
 __VERSION__ macro expands to: 13.1.0
 ```
 
-### `export_net [filename]`
+### `export_net [filenameBigNet] [filenameSmallNet]`
 
 Exports the currently loaded network to a file.
 If the currently loaded network is the embedded network and the filename is not specified then the network is saved to the file matching the name of the embedded network, as defined in `evaluate.h`.

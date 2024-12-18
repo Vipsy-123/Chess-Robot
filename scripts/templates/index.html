@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chess Robot Game Monitor</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .game-board { margin-bottom: 20px; }
+        .status { padding: 10px; margin: 10px 0; background-color: #f0f0f0; }
+        .captured-pieces { margin: 10px 0; }
+        .script-status { margin: 10px 0; padding: 10px; background-color: #e0e0e0; }
+    </style>
+    <script>
+        function updateGameState() {
+            fetch('/game_state')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('game-status').textContent = data.status;
+                    document.getElementById('current-player').textContent = data.current_player;
+                    document.getElementById('last-move').textContent = data.last_move || 'None';
+                    document.getElementById('message').textContent = data.message;
+                    
+                    // Update captured pieces
+                    document.getElementById('white-captured').textContent = 
+                        data.captured_pieces.white.join(', ') || 'None';
+                    document.getElementById('black-captured').textContent = 
+                        data.captured_pieces.black.join(', ') || 'None';
+                    
+                    // Update script statuses
+                    document.getElementById('detection-status').textContent = 
+                        data.detection_status || 'Waiting...';
+                    document.getElementById('extraction-status').textContent = 
+                        data.extraction_status || 'Waiting...';
+                    document.getElementById('localization-status').textContent = 
+                        data.localization_status || 'Waiting...';
+                });
+        }
+        
+        // Update every second
+        setInterval(updateGameState, 1000);
+    </script>
+</head>
+<body>
+    <h1>Chess Robot Game Monitor</h1>
+    
+    <div class="status">
+        <h2>Game Status</h2>
+        <p>Status: <span id="game-status">Waiting...</span></p>
+        <p>Current Player: <span id="current-player">Waiting...</span></p>
+        <p>Last Move: <span id="last-move">None</span></p>
+        <p>Message: <span id="message">Waiting...</span></p>
+    </div>
+
+    <div class="captured-pieces">
+        <h2>Captured Pieces</h2>
+        <p>White Pieces Captured: <span id="white-captured">None</span></p>
+        <p>Black Pieces Captured: <span id="black-captured">None</span></p>
+    </div>
+
+    <div class="script-status">
+        <h2>Script Status</h2>
+        <p>Detection: <span id="detection-status">Waiting...</span></p>
+        <p>Extraction: <span id="extraction-status">Waiting...</span></p>
+        <p>Localization: <span id="localization-status">Waiting...</span></p>
+    </div>
+</body>
+</html>

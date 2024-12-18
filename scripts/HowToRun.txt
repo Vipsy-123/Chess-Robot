@@ -1,0 +1,9 @@
+ python .\Extraction.py
+
+ ..... Wait till camera open
+
+ python .\Detection.py
+
+ python .\Localisation.py2
+
+ python .\Communication.py

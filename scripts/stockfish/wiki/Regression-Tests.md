@@ -1,6 +1,4 @@
-All of the information below has been generated from the results of tests performed on the
-[Fishtest] framework. All data and graphs can be downloaded [here][google-drive]. Please
-[get involved](https://stockfishchess.org/get-involved/) if you have questions or suggestions!
+All of the information below has been generated from the results of tests performed on the [Fishtest] framework.
 
 Current Testing Criteria
 
@@ -46,6 +44,20 @@ Current Testing Criteria
 | 2024&#8209;01&#8209;21 | [master][210124-master] vs [Stockfish 16]<br><sub>`Bench: 1235377`<br>VLTC search tune<br>[\[differences\]][210124-dif] `242`</sub> | Elo: [26.49][210124-elo1] ±1.4<br><sub>Ptnml:&nbsp;64,&nbsp;4791,&nbsp;15823,&nbsp;9159,&nbsp;163<br>nElo: 54.42 ±2.8<br>PairsRatio: 1.92<br>[\[raw statistics\]][210124-raw1]</sub> | Elo: [22.91][210124-elo8] ±1.2<br><sub>Ptnml:&nbsp;12,&nbsp;4114,&nbsp;17807,&nbsp;8046,&nbsp;21<br>nElo: 51.64 ±2.8<br>PairsRatio: 1.96<br>[\[raw statistics\]][210124-raw8]</sub>
 | 2024&#8209;02&#8209;11 | [master][110224-master] vs [Stockfish 16]<br><sub>`Bench: 1027182`<br>Format code using clang-format<br>[\[differences\]][110224-dif] `269`</sub> | Elo: [22.81][110224-elo1] ±1.4<br><sub>Ptnml:&nbsp;81,&nbsp;5104,&nbsp;15792,&nbsp;8846,&nbsp;177<br>nElo: 46.39 ±2.8<br>PairsRatio: 1.74<br>[\[raw statistics\]][110224-raw1]</sub> | Elo: [22.13][110224-elo8] ±1.3<br><sub>Ptnml:&nbsp;22,&nbsp;4312,&nbsp;17524,&nbsp;8112,&nbsp;30<br>nElo: 49.11 ±2.8<br>PairsRatio: 1.88<br>[\[raw statistics\]][110224-raw8]</sub>
 | 2024&#8209;02&#8209;17 | [master][170224-master] vs [Stockfish 16]<br><sub>`Bench: 1303971`<br>Simplify PV node reduction<br>[\[differences\]][170224-dif] `276`</sub> | Elo: [27.04][170224-elo1] ±1.4<br><sub>Ptnml:&nbsp;65,&nbsp;4832,&nbsp;15656,&nbsp;9272,&nbsp;175<br>nElo: 55.20 ±2.9<br>PairsRatio: 1.93<br>[\[raw statistics\]][170224-raw1]</sub> | Elo: [27.03][170224-elo8] ±1.2<br><sub>Ptnml:&nbsp;16,&nbsp;3891,&nbsp;17544,&nbsp;8517,&nbsp;32<br>nElo: 60.62 ±2.9<br>PairsRatio: 2.19<br>[\[raw statistics\]][170224-raw8]</sub>
+| 2024&#8209;02&#8209;24 | [Stockfish 16.1] [[[https://stockfishchess.org/images/logo/icon_128x128.png\|width=20px]]][SF161RN]<br><sub>`Bench: 1303971`<br>[\[differences\]][240224-dif] `280`</sub> |  |  |  |
+| 2024&#8209;03&#8209;12 | [master][120324-master] vs [Stockfish 16]<br><sub>`Bench: 1715522`<br>Search + Eval + Movepick Tune<br>[\[differences\]][120324-dif] `302`</sub> | Elo: [27.13][120324-elo1] ±1.4<br><sub>Ptnml:&nbsp;79,&nbsp;4801,&nbsp;15674,&nbsp;9257,&nbsp;189<br>nElo: 55.27 ±2.9<br>PairsRatio: 1.94<br>[\[raw statistics\]][120324-raw1]</sub> | Elo: [29.99][120324-elo8] ±1.2<br><sub>Ptnml:&nbsp;15,&nbsp;3656,&nbsp;17515,&nbsp;8775,&nbsp;39<br>nElo: 67.59 ±2.9<br>PairsRatio: 2.40<br>[\[raw statistics\]][120324-raw8]</sub>
+| 2024&#8209;03&#8209;29 | [master][290324-master] vs [Stockfish 16]<br><sub>`Bench: 1759189`<br>Simplify NMP Condition<br>[\[differences\]][290324-dif] `322`</sub> | Elo: [27.73][290324-elo1] ±1.4<br><sub>Ptnml:&nbsp;80,&nbsp;4736,&nbsp;15703,&nbsp;9287,&nbsp;194<br>nElo: 56.57 ±2.9<br>PairsRatio: 1.97<br>[\[raw statistics\]][290324-raw1]</sub> | Elo: [30.03][290324-elo8] ±1.2<br><sub>Ptnml:&nbsp;16,&nbsp;3637,&nbsp;17534,&nbsp;8784,&nbsp;29<br>nElo: 67.81 ±2.9<br>PairsRatio: 2.41<br>[\[raw statistics\]][290324-raw8]</sub>
+| 2024&#8209;04&#8209;11 | [master][110424-master] vs [Stockfish 16]<br><sub>`Bench: 1479416`<br>Simplify the depth-dependent part of the best value adjustment formula in main search<br>[\[differences\]][110424-dif] `333`</sub> | Elo: [23.53][110424-elo1] ±1.4<br><sub>Ptnml:&nbsp;75,&nbsp;5095,&nbsp;15696,&nbsp;8965,&nbsp;169<br>nElo: 47.82 ±2.8<br>PairsRatio: 1.77<br>[\[raw statistics\]][110424-raw1]</sub> | Elo: [35.27][110424-elo8] ±1.2<br><sub>Ptnml:&nbsp;10,&nbsp;3235,&nbsp;17465,&nbsp;9255,&nbsp;35<br>nElo: 80.49 ±2.9<br>PairsRatio: 2.86<br>[\[raw statistics\]][110424-raw8]</sub>
+| 2024&#8209;04&#8209;24 | [master][240424-master] vs [Stockfish 16]<br><sub>`Bench: 1836777`<br>Implement accumulator refresh table<br>[\[differences\]][240424-dif] `348`</sub> | Elo: [32.04][240424-elo1] ±1.4<br><sub>Ptnml:&nbsp;51,&nbsp;4471,&nbsp;15578,&nbsp;9709,&nbsp;191<br>nElo: 65.84 ±2.9<br>PairsRatio: 2.19<br>[\[raw statistics\]][240424-raw1]</sub> | Elo: [37.86][240424-elo8] ±1.2<br><sub>Ptnml:&nbsp;7,&nbsp;3255,&nbsp;17012,&nbsp;9670,&nbsp;56<br>nElo: 85.18 ±2.9<br>PairsRatio: 2.98<br>[\[raw statistics\]][240424-raw8]</sub>
+| 2024&#8209;05&#8209;05 | [master][050524-master] vs [Stockfish 16]<br><sub>`Bench: 2180675`<br>VVLTC search tune<br>[\[differences\]][050524-dif] `369`</sub> | Elo: [28.90][050524-elo1] ±1.4<br><sub>Ptnml:&nbsp;70,&nbsp;4716,&nbsp;15571,&nbsp;9451,&nbsp;192<br>nElo: 58.87 ±2.9<br>PairsRatio: 2.01<br>[\[raw statistics\]][050524-raw1]</sub> | Elo: [40.41][050524-elo8] ±1.2<br><sub>Ptnml:&nbsp;6,&nbsp;3047,&nbsp;16994,&nbsp;9899,&nbsp;54<br>nElo: 91.59 ±2.9<br>PairsRatio: 3.26<br>[\[raw statistics\]][050524-raw8]</sub>
+| 2024&#8209;05&#8209;13 | [master][130524-master] vs [Stockfish 16]<br><sub>`Bench: 1876282`<br>Optimize update_accumulator_refresh_cache()<br>[\[differences\]][130524-dif] `386`</sub> | Elo: [28.23][130524-elo1] ±1.4<br><sub>Ptnml:&nbsp;94,&nbsp;4694,&nbsp;15651,&nbsp;9376,&nbsp;185<br>nElo: 57.50 ±2.9<br>PairsRatio: 2.00<br>[\[raw statistics\]][130524-raw1]</sub> | Elo: [39.08][130524-elo8] ±1.2<br><sub>Ptnml:&nbsp;12,&nbsp;3037,&nbsp;17207,&nbsp;9707,&nbsp;37<br>nElo: 89.14 ±2.9<br>PairsRatio: 3.20<br>[\[raw statistics\]][130524-raw8]</sub>
+| 2024&#8209;05&#8209;18 | [master][180524-master] vs [Stockfish 16]<br><sub>`Bench: 1198142`<br>VVLTC search tune<br>[\[differences\]][180524-dif] `405`</sub> | Elo: [26.54][180524-elo1] ±1.4<br><sub>Ptnml:&nbsp;78,&nbsp;4876,&nbsp;15650,&nbsp;9185,&nbsp;211<br>nElo: 53.85 ±2.8<br>PairsRatio: 1.90<br>[\[raw statistics\]][180524-raw1]</sub> | Elo: [38.55][180524-elo8] ±1.2<br><sub>Ptnml:&nbsp;11,&nbsp;3150,&nbsp;17089,&nbsp;9698,&nbsp;52<br>nElo: 87.18 ±2.9<br>PairsRatio: 3.08<br>[\[raw statistics\]][180524-raw8]</sub>
+| 2024&#8209;05&#8209;28 | [master][280524-master] vs [Stockfish 16]<br><sub>`Bench: 1856147`<br>Improve performance on NUMA systems<br>[\[differences\]][280524-dif] `433`</sub> | Elo: [30.13][280524-elo1] ±1.4<br><sub>Ptnml:&nbsp;65,&nbsp;4557,&nbsp;15687,&nbsp;9504,&nbsp;187<br>nElo: 61.85 ±2.9<br>PairsRatio: 2.10<br>[\[raw statistics\]][280524-raw1]</sub> | Elo: [39.34][280524-elo8] ±1.2<br><sub>Ptnml:&nbsp;6,&nbsp;3094,&nbsp;17063,&nbsp;9803,&nbsp;34<br>nElo: 89.36 ±2.9<br>PairsRatio: 3.17<br>[\[raw statistics\]][280524-raw8]</sub>
+| 2024&#8209;06&#8209;08 | [master][080624-master] vs [Stockfish 16]<br><sub>`Bench: 1174094`<br>Make repeated bench runs identical<br>[\[differences\]][080624-dif] `490`</sub> | Elo: [35.60][080624-elo1] ±1.4<br><sub>Ptnml:&nbsp;70,&nbsp;4218,&nbsp;15445,&nbsp;10049,&nbsp;218<br>nElo: 73.01 ±2.9<br>PairsRatio: 2.39<br>[\[raw statistics\]][080624-raw1]</sub> | Elo: [39.31][080624-elo8] ±1.2<br><sub>Ptnml:&nbsp;15,&nbsp;3169,&nbsp;16895,&nbsp;9884,&nbsp;37<br>nElo: 88.49 ±2.9<br>PairsRatio: 3.12<br>[\[raw statistics\]][080624-raw8]</sub>
+| 2024&#8209;07&#8209;01 | [master][010724-master] vs [Stockfish 16]<br><sub>`Bench: 1227870`<br>Probcut in check no matter if pv or capture<br>[\[differences\]][010724-dif] `517`</sub> | Elo: [40.07][010724-elo1] ±1.4<br><sub>Ptnml:&nbsp;83,&nbsp;3933,&nbsp;15243,&nbsp;10493,&nbsp;248<br>nElo: 82.11 ±2.9<br>PairsRatio: 2.67<br>[\[raw statistics\]][010724-raw1]</sub> | Elo: [40.34][010724-elo8] ±1.2<br><sub>Ptnml:&nbsp;11,&nbsp;3043,&nbsp;16987,&nbsp;9918,&nbsp;41<br>nElo: 91.47 ±2.9<br>PairsRatio: 3.26<br>[\[raw statistics\]][010724-raw8]</sub>
+| 2024&#8209;07&#8209;09 | [master][090724-master] vs [Stockfish 16]<br><sub>`Bench: 1300471`<br>Move Loop Consistency in Probcut<br>[\[differences\]][090724-dif] `548`</sub> | Elo: [41.51][090724-elo1] ±1.4<br><sub>Ptnml:&nbsp;68,&nbsp;3769,&nbsp;15319,&nbsp;10649,&nbsp;195<br>nElo: 86.22 ±3.0<br>PairsRatio: 2.83<br>[\[raw statistics\]][090724-raw1]</sub> | Elo: [43.42][090724-elo8] ±1.2<br><sub>Ptnml:&nbsp;15,&nbsp;2811,&nbsp;16912,&nbsp;10224,&nbsp;38<br>nElo: 99.12 ±3.0<br>PairsRatio: 3.63<br>[\[raw statistics\]][090724-raw8]</sub>
+| 2024&#8209;07&#8209;23 | [master][230724-master] vs [Stockfish 16]<br><sub>`Bench: 1371485`<br>Update default main net to nn-31337bea577c.nnue<br>[\[differences\]][230724-dif] `578`</sub> | Elo: [42.30][230724-elo1] ±1.4<br><sub>Ptnml:&nbsp;59,&nbsp;3800,&nbsp;15131,&nbsp;10833,&nbsp;177<br>nElo: 87.72 ±3.0<br>PairsRatio: 2.85<br>[\[raw statistics\]][230724-raw1]</sub> | Elo: [45.06][230724-elo8] ±1.2<br><sub>Ptnml:&nbsp;14,&nbsp;2685,&nbsp;16907,&nbsp;10337,&nbsp;57<br>nElo: 103.20 ±3.0<br>PairsRatio: 3.85<br>[\[raw statistics\]][230724-raw8]</sub>
+| 2024&#8209;08&#8209;20 | [master][200824-master] vs [Stockfish 16]<br><sub>`Bench: 1484730`<br>Tweak late move extensions<br>[\[differences\]][200824-dif] `595`</sub> | Elo: [44.12][200824-elo1] ±1.4<br><sub>Ptnml:&nbsp;69,&nbsp;3686,&nbsp;15064,&nbsp;10960,&nbsp;221<br>nElo: 91.20 ±3.0<br>PairsRatio: 2.98<br>[\[raw statistics\]][200824-raw1]</sub> | Elo: [44.32][200824-elo8] ±1.2<br><sub>Ptnml:&nbsp;16,&nbsp;2814,&nbsp;16741,&nbsp;10400,&nbsp;29<br>nElo: 100.85 ±3.0<br>PairsRatio: 3.69<br>[\[raw statistics\]][200824-raw8]</sub>
 </div>
 
 ---
@@ -54,7 +66,12 @@ Current Testing Criteria
 
 ### Elo Progression
 
-| [![][graph-daily1]][graph-daily1] | [![][graph-daily8]][graph-daily8] |
+| [![][graph-elo1]][graph-elo1] | [![][graph-elo8]][graph-elo8] |
+|:---------------------------------:|:---------------------------------:|
+
+### Normalized Elo Progression
+
+| [![][graph-nelo1]][graph-nelo1] | [![][graph-nelo8]][graph-nelo8] |
 |:---------------------------------:|:---------------------------------:|
 
 ### Game Pair Ratio Progression
@@ -480,7 +497,7 @@ There are several pages on the web run by chess engine fans. Some collect progre
 over previous stable versions and development builds. Some compare Stockfish progress to other
 chess engines. Here is a collection of some useful links in that regard.
 
-* [Computer Chess Rating Lists (CCRL)](https://ccrl.chessdom.com)
+* [Computer Chess Rating Lists (CCRL)](https://computerchess.org.uk/ccrl/4040/)
 * [FastGMs Rating Lists (FGRL)](http://www.fastgm.de)
 * [Ipman Chess](http://ipmanchess.yolasite.com)
 * [Mate Finding Effectiveness](https://github.com/vondele/matetrack)
@@ -1747,10 +1764,12 @@ chess engines. Here is a collection of some useful links in that regard.
 [220623-raw1]:    https://tests.stockfishchess.org/tests/stats/6494094adc7002ce609c99a4
 [220623-raw1uho]: https://tests.stockfishchess.org/tests/stats/6494097ddc7002ce609c99b7
 [220623-raw8]:    https://tests.stockfishchess.org/tests/stats/64940956dc7002ce609c99a7
+
 [Stockfish 16]:   https://github.com/official-stockfish/Stockfish/commit/68e1e9b381
 [SF16DP]:         https://github.com/official-stockfish/Stockfish/assets/63931154/5297318e-89fb-407f-a8a8-9e4278d90eda "Development Progress"
 [SF16RN]:         https://stockfishchess.org/blog/2023/stockfish-16/ "Release Notes"
 [290623-dif]:     https://github.com/official-stockfish/Stockfish/compare/e6e324eb28...68e1e9b381
+
 [190723-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...5ea1cbc778
 [190723-elo1]:    https://tests.stockfishchess.org/tests/view/64b83cd1dc56e1650abad318
 [190723-elo8]:    https://tests.stockfishchess.org/tests/view/64b83cdbdc56e1650abad31a
@@ -1829,10 +1848,95 @@ chess engines. Here is a collection of some useful links in that regard.
 [170224-master]:  https://github.com/official-stockfish/Stockfish/commit/fc41f64dfd8a61d0e275ddbecec292833458b86a
 [170224-raw1]:    https://tests.stockfishchess.org/tests/stats/65d666051d8e83c78bfddbd6
 [170224-raw8]:    https://tests.stockfishchess.org/tests/stats/65d666051d8e83c78bfddbd8
-[google-drive]:   https://drive.google.com/file/d/1-nrLSeYllEUHbdacXgyRFHbuBiIZr0jJ/view
+
+[Stockfish 16.1]: https://github.com/official-stockfish/Stockfish/commit/e67cc979fd2c0e66dfc2b2f2daa0117458cfc462
+[SF161RN]:        https://stockfishchess.org/blog/2024/stockfish-16-1/ "Release Notes"
+[240224-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...e67cc979fd
+
+[120324-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...627974c99f
+[120324-elo1]:    https://tests.stockfishchess.org/tests/view/65f0798e0ec64f0526c463e5
+[120324-elo8]:    https://tests.stockfishchess.org/tests/view/65f079910ec64f0526c463e7
+[120324-master]:  https://github.com/official-stockfish/Stockfish/commit/627974c99fcd5a3dcbd5a8e0eb12f2afeb2d0a9a
+[120324-raw1]:    https://tests.stockfishchess.org/tests/stats/65f0798e0ec64f0526c463e5
+[120324-raw8]:    https://tests.stockfishchess.org/tests/stats/65f079910ec64f0526c463e7
+[290324-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...e13e4cfb83
+[290324-elo1]:    https://tests.stockfishchess.org/tests/view/660688190ec64f0526c59e5a
+[290324-elo8]:    https://tests.stockfishchess.org/tests/view/660688240ec64f0526c59e5c
+[290324-master]:  https://github.com/official-stockfish/Stockfish/commit/e13e4cfb8340cdb26a00679681a0f163c6b4f0a9
+[290324-raw1]:    https://tests.stockfishchess.org/tests/stats/660688190ec64f0526c59e5a
+[290324-raw8]:    https://tests.stockfishchess.org/tests/stats/660688240ec64f0526c59e5c
+[110424-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...249eec6715
+[110424-elo1]:    https://tests.stockfishchess.org/tests/view/66184ce85a4693796d966cba
+[110424-elo8]:    https://tests.stockfishchess.org/tests/view/66184cf15a4693796d966cbc
+[110424-master]:  https://github.com/official-stockfish/Stockfish/commit/249eec67152d334d76c0f981907a6f5787289443
+[110424-raw1]:    https://tests.stockfishchess.org/tests/stats/66184ce85a4693796d966cba
+[110424-raw8]:    https://tests.stockfishchess.org/tests/stats/66184cf15a4693796d966cbc
+[240424-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...49ef4c935a
+[240424-elo1]:    https://tests.stockfishchess.org/tests/view/66293d2a3fe04ce4cefc7a5f
+[240424-elo8]:    https://tests.stockfishchess.org/tests/view/66293d2e3fe04ce4cefc7a61
+[240424-master]:  https://github.com/official-stockfish/Stockfish/commit/49ef4c935a5cb0e4d94096e6354caa06b36b3e3c
+[240424-raw1]:    https://tests.stockfishchess.org/tests/stats/66293d2a3fe04ce4cefc7a5f
+[240424-raw8]:    https://tests.stockfishchess.org/tests/stats/66293d2e3fe04ce4cefc7a61
+[050524-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...070e564c38
+[050524-elo1]:    https://tests.stockfishchess.org/tests/view/663787949819650825aa6773
+[050524-elo8]:    https://tests.stockfishchess.org/tests/view/663787959819650825aa6777
+[050524-master]:  https://github.com/official-stockfish/Stockfish/commit/070e564c389eb2c263f3982060ab5899b67d0a62
+[050524-raw1]:    https://tests.stockfishchess.org/tests/stats/663787949819650825aa6773
+[050524-raw8]:    https://tests.stockfishchess.org/tests/stats/663787959819650825aa6777
+[130524-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...e608eab8dd
+[130524-elo1]:    https://tests.stockfishchess.org/tests/view/6641a8bef9f4e8fc783cb991
+[130524-elo8]:    https://tests.stockfishchess.org/tests/view/6641a8c8f9f4e8fc783cb993
+[130524-master]:  https://github.com/official-stockfish/Stockfish/commit/e608eab8dd9f7bd68f192d56d742f621674b8fa8
+[130524-raw1]:    https://tests.stockfishchess.org/tests/stats/6641a8bef9f4e8fc783cb991
+[130524-raw8]:    https://tests.stockfishchess.org/tests/stats/6641a8c8f9f4e8fc783cb993
+[180524-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...99f1bacfd6
+[180524-elo1]:    https://tests.stockfishchess.org/tests/view/6648e29e02679895021d0594
+[180524-elo8]:    https://tests.stockfishchess.org/tests/view/6648e2a602679895021d0596
+[180524-master]:  https://github.com/official-stockfish/Stockfish/commit/99f1bacfd6864afca86ae74f33232b9cdfb3828c
+[180524-raw1]:    https://tests.stockfishchess.org/tests/stats/6648e29e02679895021d0594
+[180524-raw8]:    https://tests.stockfishchess.org/tests/stats/6648e2a602679895021d0596
+[280524-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...a169c78b6d
+[280524-elo1]:    https://tests.stockfishchess.org/tests/view/6656c2f46b0e318cefa8bbd8
+[280524-elo8]:    https://tests.stockfishchess.org/tests/view/6656c30a6b0e318cefa8bbdb
+[280524-master]:  https://github.com/official-stockfish/Stockfish/commit/a169c78b6d3b082068deb49a39aaa1fd75464c7f
+[280524-raw1]:    https://tests.stockfishchess.org/tests/stats/6656c2f46b0e318cefa8bbd8
+[280524-raw8]:    https://tests.stockfishchess.org/tests/stats/6656c30a6b0e318cefa8bbdb
+[080624-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...e271059e08
+[080624-elo1]:    https://tests.stockfishchess.org/tests/view/6664d56822234461cef58e71
+[080624-elo8]:    https://tests.stockfishchess.org/tests/view/6664d56b22234461cef58e73
+[080624-master]:  https://github.com/official-stockfish/Stockfish/commit/e271059e08c6258420af12897367ea2149220171
+[080624-raw1]:    https://tests.stockfishchess.org/tests/stats/6664d56822234461cef58e71
+[080624-raw8]:    https://tests.stockfishchess.org/tests/stats/6664d56b22234461cef58e73
+[010724-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...6138a0fd0e
+[010724-elo1]:    https://tests.stockfishchess.org/tests/view/6683a08cc4f539faa03268e3
+[010724-elo8]:    https://tests.stockfishchess.org/tests/view/6683a096c4f539faa03268e5
+[010724-master]:  https://github.com/official-stockfish/Stockfish/commit/6138a0fd0e43753a86e4a170a5f6e2b7b6752677
+[010724-raw1]:    https://tests.stockfishchess.org/tests/stats/6683a08cc4f539faa03268e3
+[010724-raw8]:    https://tests.stockfishchess.org/tests/stats/6683a096c4f539faa03268e5
+[090724-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...362a77a345
+[090724-elo1]:    https://tests.stockfishchess.org/tests/view/668d79a65034141ae5999e43
+[090724-elo8]:    https://tests.stockfishchess.org/tests/view/668d79ae5034141ae5999e45
+[090724-master]:  https://github.com/official-stockfish/Stockfish/commit/362a77a3450335e1940020c080bf3b7b361c594a
+[090724-raw1]:    https://tests.stockfishchess.org/tests/stats/668d79a65034141ae5999e43
+[090724-raw8]:    https://tests.stockfishchess.org/tests/stats/668d79ae5034141ae5999e45
+[230724-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...b55217fd02
+[230724-elo1]:    https://tests.stockfishchess.org/tests/view/669feadf4ff211be9d4ecaf4
+[230724-elo8]:    https://tests.stockfishchess.org/tests/view/669feae74ff211be9d4ecaf6
+[230724-master]:  https://github.com/official-stockfish/Stockfish/commit/b55217fd02d8e5bc0754e5f27bc84df7b01479a6
+[230724-raw1]:    https://tests.stockfishchess.org/tests/stats/669feadf4ff211be9d4ecaf4
+[230724-raw8]:    https://tests.stockfishchess.org/tests/stats/669feae74ff211be9d4ecaf6
+[200824-dif]:     https://github.com/official-stockfish/Stockfish/compare/68e1e9b381...9fb58328e3
+[200824-elo1]:    https://tests.stockfishchess.org/tests/view/66c4f20021503a509c13b8b7
+[200824-elo8]:    https://tests.stockfishchess.org/tests/view/66c4f21721503a509c13b8b9
+[200824-master]:  https://github.com/official-stockfish/Stockfish/commit/9fb58328e363d84e3cf720b018e639b139ba95c2
+[200824-raw1]:    https://tests.stockfishchess.org/tests/stats/66c4f20021503a509c13b8b7
+[200824-raw8]:    https://tests.stockfishchess.org/tests/stats/66c4f21721503a509c13b8b9
+
 [graph-current]:  https://docs.google.com/spreadsheets/u/2/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=429149495&format=image
-[graph-daily1]:   https://docs.google.com/spreadsheets/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=1631702142&format=image
-[graph-daily8]:   https://docs.google.com/spreadsheets/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=991230633&format=image
+[graph-elo1]:     https://docs.google.com/spreadsheets/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=1631702142&format=image
+[graph-elo8]:     https://docs.google.com/spreadsheets/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=991230633&format=image
+[graph-nelo1]:    https://docs.google.com/spreadsheets/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=1045014049&format=image
+[graph-nelo8]:    https://docs.google.com/spreadsheets/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=1302996667&format=image
 [graph-gpr1]:     https://docs.google.com/spreadsheets/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=65689441&format=image
 [graph-gpr8]:     https://docs.google.com/spreadsheets/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=1638166821&format=image
 [graph-dve1]:     https://docs.google.com/spreadsheets/d/e/2PACX-1vQqw86SXD_-zzP39DzfjBQ1eLBGyZMPyVLPuZDTY7zSNxBvxxj9CUXpd_AHRKy1aCpCCXGsznolmMVs/pubchart?oid=699890902&format=image

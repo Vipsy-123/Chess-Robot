@@ -16,13 +16,17 @@ import numpy as np
 import time
 import warnings
 
+
+MODEL = "chess-board-model-6wp7t/1"
+API_KEY = "5wYIwfVPqdeD3B9yZMfU"
+
 # Ignore all warnings
 warnings.filterwarnings("ignore")
 # Create a simple box annotator to use in our custom sink
 annotator = sv.BoxAnnotator()
 
 # Load the model
-model = get_roboflow_model(model_id="chess-corner-detection/1", api_key="oJrlpFzFT49RMEIXZJoN")
+model = get_roboflow_model(model_id=MODEL, api_key=API_KEY)
 
 # Track the time of the last frame processing
 last_frame_time = time.time()
@@ -109,15 +113,16 @@ def my_custom_sink(predictions: dict, video_frame: VideoFrame):
         chessboard_image = extract_chessboard(video_frame.image, detections.xyxy)
         cv2.imwrite("../saved_files/board.png", chessboard_image)
         # Add a delay after saving the image (for example, 1 second)
-        time.sleep(.001) 
-
-pipeline = InferencePipeline.init(
-    model_id="chess-corner-detection/1",
-    api_key="oJrlpFzFT49RMEIXZJoN", # chess-corner-detection/1
-    video_reference=0, # To Use Mobile camera stream as webcam - 1, For video use - "../media/document_6064252294466113797.mp4"
-    on_prediction=my_custom_sink
-)
-
+        time.sleep(0.001) 
+try:
+    pipeline = InferencePipeline.init(
+        model_id=MODEL,
+        api_key=API_KEY, # chess-corner-detection/1
+        video_reference=0 , # To Use Mobile camera stream as webcam - 1, For video use - "../media/document_6064252294466113797.mp4"
+        on_prediction=my_custom_sink,
+        confidence=0.25    )
+except Exception as e:
+    print(f"ERROR : {e} :-- Camera Not Connected")
 
 pipeline.start()
 pipeline.join()
