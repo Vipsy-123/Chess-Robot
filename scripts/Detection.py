@@ -6,10 +6,10 @@ import json
 import time
 
 # Load the model
-model = get_roboflow_model(model_id="che-jqbyk/2", api_key="5wYIwfVPqdeD3B9yZMfU")
+model = get_roboflow_model(model_id="che-jqbyk/6", api_key="5wYIwfVPqdeD3B9yZMfU")
 
 # Define NMS parameters
-conf_thresh = 0.30  # Confidence threshold
+conf_thresh = 0.20  # Confidence threshold
 iou_thresh = 0.50   # IOU threshold
 max_detections = 32 # Maximum number of detections
 
@@ -35,7 +35,7 @@ while True:
         existing_predictions = []
         for prediction in results.predictions:
             if prediction.confidence > conf_thresh :
-                if(prediction.class_name == "1" or prediction.class_name == "7"):
+                if(prediction.class_name == "1" or prediction.class_name == "7" or  prediction.class_name == "3" or prediction.class_name == "9"):
                     prediction_dict = {
                         "detection_id": prediction.detection_id,
                         "class_name": prediction.class_name,
@@ -48,7 +48,7 @@ while True:
                         },
                         "confidence": prediction.confidence
                     }
-                elif (prediction.class_name == "6" or prediction.class_name == "3"):
+                elif (prediction.class_name == "6" or prediction.class_name == "3" or prediction.class_name == "6" or prediction.class_name == "12"):
                     prediction_dict = {
                         "detection_id": prediction.detection_id,
                         "class_name": prediction.class_name,
@@ -61,7 +61,7 @@ while True:
                         },
                         "confidence": prediction.confidence
                     }
-                elif(prediction.class_name == "2" or prediction.class_name == "5" or prediction.class_name == "8" or prediction.class_name == "11" or  prediction.class_name == "3" or prediction.class_name == "9" or prediction.class_name == "10" or prediction.class_name == "4"):
+                elif(prediction.class_name == "2" or prediction.class_name == "5" or prediction.class_name == "8" or prediction.class_name == "11"  or prediction.class_name == "10" or prediction.class_name == "4"):
                     prediction_dict = {
                         "detection_id": prediction.detection_id,
                         "class_name": prediction.class_name,

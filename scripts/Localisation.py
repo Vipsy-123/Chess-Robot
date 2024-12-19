@@ -203,7 +203,7 @@ class ChessboardProcessor:
     def display_board(self) -> None:
         """Display the current board state."""
         img = cv2.imread(self.png_path)
-        cv2.imshow('Board', img)
+        cv2.imshow('Piece Prediction', img)
         cv2.waitKey(1000)
     
     def cleanup_temp_files(self) -> None:

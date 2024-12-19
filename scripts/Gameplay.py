@@ -197,7 +197,10 @@ class ChessRobotController:
             source = chess.square_name(move.from_square)
             destination = chess.square_name(move.to_square)
             
-            return source, destination, False
+            # Check if destination square is occupied by checking for a list with color info
+            is_attack = isinstance(self.occupied_pos.get(destination), list)
+
+            return source, destination, is_attack
             
         except Exception as e:
             print(f"Error in get_best_move: {e}")
@@ -290,19 +293,58 @@ class ChessRobotController:
             return False
 
 
-    
-    def update_board_state(self,chance) -> None:
-        """Update the chess board based on current predictions."""
-        print("5.1")
+        
+    def update_board_state(self, chance) -> None:
+        """
+        Update the chess board state and refresh all dependent game state information.
+        
+        This method handles:
+        1. Getting new occupied positions
+        2. Checking differences from previous state
+        3. Updating the board state
+        4. Refreshing the legal moves dictionary
+        5. Updating the visual representation
+        
+        Args:
+            chance: Boolean indicating whose turn it is (True for human, False for robot)
+        """
+        print("Starting board state update...")
+        
+        # Get new position information
+        print("5.1: Getting new occupied positions")
         new_pos = self.processor.get_occupied_positions()
-        print("5.2")
-        results = self.processor.diff_checker(self.occupied_pos , new_pos,moves_dict=self.moves_dict,chance=chance)
-        print("5.3")
-
-        # print(f"Diff Checker results src: {results['src'][0]} --> dst :{results['dst'][0]}")
+        
+        print("5.2: Checking position differences")
+        results = self.processor.diff_checker(
+            self.occupied_pos, 
+            new_pos,
+            moves_dict=self.moves_dict,
+            chance=chance
+        )
+        
+        print("5.3: Updating occupied positions")
         self.occupied_pos = new_pos
-        self.moves_dict , self.fen_string, self.board = self.processor.update_fen_from_occupied_pos(results=results, moves_dict=self.moves_dict, board=self.board)
-        print("5.4")
+        self.processor.save_json_data(self.occupied_pos,OCCUPIED_POS_PATH)
+        
+
+        # Update internal board state
+        print("5.4: Updating board state")
+        self.moves_dict, self.fen_string, self.board = self.processor.update_fen_from_occupied_pos(
+            results=results, 
+            moves_dict=self.moves_dict, 
+            board=self.board,
+            chance=chance
+        )
+        
+        # Get fresh legal moves for the new position
+        print("5.5: Refreshing legal moves dictionary")
+        self.moves_dict = self.processor.get_legal_moves(self.fen_string)
+        
+        # Update visual representation
+        print("5.6: Updating visual display")
+        self.processor.board = self.board  # Sync processor's board with current state
+        self.processor.generate_board_visuals()
+        self.processor.display_board()
 
    
     def main(self):
@@ -310,11 +352,12 @@ class ChessRobotController:
         print("\n🎮 WELCOME TO CHESS ROBOT GAME 🎮")
         print("Press SPACE to start each turn...")
         
-        self.occupied_pos = self.processor.get_occupied_positions()
+        
         
         while True:
             if keyboard.is_pressed('space'):
-                    break
+                self.occupied_pos = self.processor.get_occupied_positions()
+                break
         while True:
                 # Display the board and read FEN string
                 self.processor.generate_board_visuals()
@@ -345,7 +388,11 @@ class ChessRobotController:
                     print("Press SPACE when you've completed your move...")
                     
                     while True:
+                        self.processor.generate_board_visuals()
+                        self.processor.display_board()
                         if keyboard.is_pressed('space'):
+                            time.sleep(3)
+                            print("Processing move....")
                             self.robot_move = True
                             self.human_move = False
                             break
@@ -359,7 +406,7 @@ class ChessRobotController:
                     print("\n🤖 Robot's Turn 🤖")
                     try:
                         # Get best move and execute it
-                        src, dst, _ = self.get_best_move(self.fen_string)
+                        src, dst, is_attack = self.get_best_move(self.fen_string)
 
                         if src is None or dst is None:
                             print("Unable to make move, skipping robot's turn")
@@ -371,15 +418,12 @@ class ChessRobotController:
                         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                             s.connect((self.host, self.port))
 
-                            if self.occupied_pos.get(dst) == 1: 
-                                attk = 1
-                            else: 
-                                attk = 0
+                            attack = 1 if is_attack else 0
 
                             src_num = SQUARE_MAPPING[src]
                             dst_num = SQUARE_MAPPING[dst]
-                            print(f"Robot moving from {src} --> {dst} ATTACK {attk}")
-                            move_data = f'{src_num},{dst_num},{attk}'.encode()
+                            print(f"Robot moving from {src} --> {dst} ATTACK {attack}")
+                            move_data = f'{src_num},{dst_num},{attack}'.encode()
                             s.sendall(move_data)
 
                             # Receive the response from the robot
@@ -389,7 +433,7 @@ class ChessRobotController:
                             self.robot_move = False
                             self.human_move = True
 
-                            time.sleep(10)
+                            time.sleep(2)
 
                             # Update board state after robot's move
                             self.update_board_state(0)
@@ -547,9 +591,9 @@ class ChessboardProcessor :
             if closest_square:
 
                 # Mark square as occupied
-                if prediction['class_name'] >= 7:
+                if int(prediction['class_name']) >= 7:
                     occupied_positions[closest_square] = ["W",1]
-                elif prediction['class_name'] < 7:
+                elif int(prediction['class_name']) < 7:
                     occupied_positions[closest_square] = ["B",1]
 
         self.save_json_data(occupied_positions,self.occupied_pos_path)
@@ -557,124 +601,152 @@ class ChessboardProcessor :
         return occupied_positions
 
 
-    def get_legal_moves(self,fen):
+    def get_legal_moves(self, fen):
         """
-        Extracts all legal moves for both white and black pieces from a chessboard's FEN representation
-        and organizes them into a dictionary with simple piece numbering (e.g., P_1, n_1).
+        Extracts all legal moves for both white and black pieces regardless of whose turn it is.
         
         Args:
             fen (str): The FEN representation of the chessboard.
         
         Returns:
-            dict: A dictionary with simple piece names (e.g., P_1, n_1) as keys
-                and their legal moves as values for both sides.
+            dict: A dictionary containing legal moves for all pieces of both colors
         """
-        print("Got all legal moves")
-
-        def extract_legal_moves(board, legal_moves):
-            """
-            Helper function to extract legal moves for the current turn.
-            """
+        print("Getting legal moves for both sides...")
+        
+        def get_moves_for_position(board):
+            """Helper function to get moves for all pieces in a given position"""
             moves_by_piece = {}
-            piece_counts = {}
-
+            piece_counters = {'P': 0, 'N': 0, 'B': 0, 'R': 0, 'Q': 0, 'K': 0,
+                            'p': 0, 'n': 0, 'b': 0, 'r': 0, 'q': 0, 'k': 0}
+            
+            # First pass: count pieces and assign consistent IDs
+            piece_positions = {}  # To store piece positions for consistent numbering
             for square in chess.SQUARES:
                 piece = board.piece_at(square)
                 if piece:
-                    # Determine piece prefix
-                    piece_symbol = piece.symbol()
-                    prefix = piece_symbol.upper() if piece.color else piece_symbol.lower()
-                    
-                    # Track unique piece ID
-                    if prefix not in piece_counts:
-                        piece_counts[prefix] = 0
-                    piece_counts[prefix] += 1
-                    piece_id = f"{prefix}_{piece_counts[prefix]}"
-                    
-                    # Find legal moves for this piece
-                    piece_moves = [
-                        move.uci() for move in legal_moves if move.from_square == square
-                    ]
-                    if piece_moves:
-                        moves_by_piece[piece_id] = piece_moves
-
+                    symbol = piece.symbol()
+                    piece_counters[symbol] += 1
+                    piece_id = f"{symbol}_{piece_counters[symbol]}"
+                    piece_positions[piece_id] = square
+            
+            # Second pass: calculate legal moves for each piece
+            saved_turn = board.turn  # Save current turn
+            
+            # Calculate moves for white pieces
+            board.turn = chess.WHITE
+            for piece_id, square in piece_positions.items():
+                if piece_id[0].isupper():  # White pieces
+                    moves = []
+                    for move in board.legal_moves:
+                        if move.from_square == square:
+                            moves.append(chess.square_name(move.from_square) + 
+                                    chess.square_name(move.to_square))
+                    if moves:  # Only add pieces that have legal moves
+                        moves_by_piece[piece_id] = moves
+            
+            # Calculate moves for black pieces
+            board.turn = chess.BLACK
+            for piece_id, square in piece_positions.items():
+                if piece_id[0].islower():  # Black pieces
+                    moves = []
+                    for move in board.legal_moves:
+                        if move.from_square == square:
+                            moves.append(chess.square_name(move.from_square) + 
+                                    chess.square_name(move.to_square))
+                    if moves:  # Only add pieces that have legal moves
+                        moves_by_piece[piece_id] = moves
+            
+            # Restore original turn
+            board.turn = saved_turn
             return moves_by_piece
 
-        # Create board and get legal moves for the current turn
-        board = chess.Board(fen)
-        current_legal_moves = list(board.legal_moves)
-        moves_for_current_turn = extract_legal_moves(board, current_legal_moves)
-
-        # Create board for the opposite turn
-        board.turn = not board.turn  # Switch turn
-        opposite_legal_moves = list(board.legal_moves)
-        moves_for_opposite_turn = extract_legal_moves(board, opposite_legal_moves)
-
-        # Combine moves for both sides
-        all_moves = {**moves_for_current_turn, **moves_for_opposite_turn}
-        return all_moves
+        try:
+            # Create board from FEN
+            board = chess.Board(fen)
+            
+            # Get all legal moves for both sides
+            all_moves = get_moves_for_position(board)
+            
+            print(f"Calculated moves for both sides: {all_moves}")
+            return all_moves
+            
+        except Exception as e:
+            print(f"Error calculating legal moves: {e}")
+            return {}
 
     def diff_checker(self, old_dict, new_dict, moves_dict, chance):
         """
-        Compares two dictionaries to find keys that changed from occupied to unoccupied
-        and newly occupied (including captures).
+        Compares two dictionaries to find changes in board state, specifically tracking
+        squares that changed from occupied to unoccupied (source) and unoccupied to
+        occupied (destination).
 
         Args:
-            old_dict (dict): The previous state of positions (keys with values ["W"/"B", int] or 0).
-            new_dict (dict): The current state of positions (keys with values ["W"/"B", int] or 0).
-            moves_dict (dict): Dictionary of legal moves for each piece.
-            chance (bool): True for Human turn, False for Robot turn.
+            old_dict (dict): Previous board state with positions as {"square": ["color", occupancy]}
+            new_dict (dict): Current board state with positions as {"square": ["color", occupancy]}
+            moves_dict (dict): Dictionary of legal moves for each piece
+            chance (bool): True for Human turn, False for Robot turn
 
         Returns:
-            dict: A dictionary with:
-                - 'src': List of squares that became unoccupied.
-                - 'dst': List of valid destination squares (including captures).
+            dict: Contains 'src' and 'dst' lists of affected squares
         """
         print("In Diff checker")
 
-        # Helper function to extract occupancy value safely
         def get_occupancy_value(value):
+            """Extract occupancy value (0 or 1) from position data."""
             if isinstance(value, list):
-                return value[1]  # Return occupancy value (1 for occupied)
-            return 0  # Return 0 if unoccupied or invalid value
+                return value[1]
+            return 0
 
-        # Helper function to extract piece color
         def get_color_value(value):
+            """Extract color value ('W' or 'B') from position data."""
             if isinstance(value, list):
-                return value[0]  # Return piece color ("W" or "B")
+                return value[0]
             return None
 
-        # Identify source squares: keys where old_dict had occupancy but new_dict does not
-        src_square = [key for key in old_dict if get_occupancy_value(old_dict[key]) == 1 
-                    and get_occupancy_value(new_dict.get(key, 0)) == 0]
+        # Find source squares (where pieces moved from)
+        src_squares = []
+        for square, old_value in old_dict.items():
+            # Check if square was occupied before and is now empty
+            if (get_occupancy_value(old_value) == 1 and 
+                get_occupancy_value(new_dict.get(square, 0)) == 0):
+                src_squares.append(square)
 
-        # Simple Move logic :
-        # Identify destination squares: keys where new_dict is occupied but old_dict was not 
-        dest_square = [key for key in new_dict if get_occupancy_value(new_dict[key]) == 1 
-                    and get_occupancy_value(old_dict.get(key, 0)) == 0]
+        # Find destination squares (where pieces moved to)
+        dst_squares = []
+        for square, new_value in new_dict.items():
+            # A square is a destination if:
+            # 1. It is now occupied (new_value[1] == 1)
+            # 2. It was either empty before (old_value[1] == 0) or contains a captured piece
+            old_value = old_dict.get(square, 0)
+            if get_occupancy_value(new_value) == 1:
+                old_occupancy = get_occupancy_value(old_value)
+                if old_occupancy == 0:
+                    # Simple move to empty square
+                    dst_squares.append(square)
+                else:
+                    # Potential capture - verify based on color change
+                    old_color = get_color_value(old_value)
+                    new_color = get_color_value(new_value)
+                    if ((chance and old_color == "W" and new_color == "B") or  # Human captures White
+                        (not chance and old_color == "B" and new_color == "W")):  # Robot captures Black
+                        dst_squares.append(square)
 
-        # Handle capture logic :
-        print("Moves Dictionary:", moves_dict)
-        for key, value in moves_dict.items():
-            if isinstance(value, str) and value[:2] in src_square:  # Ensure value is a string and valid move
-                dst = value[2:4]
-                old_color = get_color_value(old_dict.get(dst))
-                new_color = get_color_value(new_dict.get(dst))
+        # Validate moves against legal moves dictionary
+        validated_dst = []
+        for dst in dst_squares:
+            for moves in moves_dict.values():
+                # Check if any source square can legally move to this destination
+                if any(move[2:4] == dst and move[:2] in src_squares for move in moves):
+                    validated_dst.append(dst)
+                    break
 
-                # Check capture condition based on "chance" (Human or Robot)
-                if chance:  # Human Turn
-                    if old_color == "W" and new_color == "B":  # White captured by Black
-                        print(f"Found capture at {dst}")
-                        dest_square.append(dst)
-                else:  # Robot Turn
-                    if old_color == "B" and new_color == "W":  # Black captured by White
-                        print(f"Found capture at {dst}")
-                        dest_square.append(dst)
-
-        return {
-            "src": src_square,            # Valid source squares
-            "dst": list(set(dest_square))  # Remove duplicates in destination squares
+        results = {
+            "src": src_squares,
+            "dst": list(set(validated_dst))  # Remove any duplicates
         }
+        
+        print(f"Detected changes - Source: {results['src']}, Destination: {results['dst']}")
+        return results
 
 
     # Function to convert file to 0-indexed integer
@@ -685,91 +757,110 @@ class ChessboardProcessor :
     def rank_to_index(self,rank):
         return int(rank) - 1
 
-    def update_fen_from_occupied_pos(self, results, moves_dict, board):
+    def update_fen_from_occupied_pos(self, results, moves_dict, board, chance):
         """
-        Update the chess board state based on detected moves and captures.
+        Update the chess board state and moves dictionary based on detected moves and captures.
         
         Args:
-            results (dict): Dictionary containing source, destination, and potential capture squares
+            results (dict): Dictionary containing source, destination squares
             moves_dict (dict): Dictionary of legal moves for pieces
             board (chess.Board): Current chess board state
+            chance (bool): True for Human turn, False for Robot turn
         
         Returns:
             tuple: Updated moves_dict, FEN string, and board
         """
         try:
-            print("Results are ")
+            print("Processing move results...")
             print(results)
 
-            # Determine the move
             src = results.get("src", [None])[0]
             dst = results.get("dst", [None])[0]
 
             if src is None or dst is None:
                 print(" 🚨 WARNING: Source or Destination square is missing. 🚨")
-                return
-            else:
-                move = src + dst
-                print(f"Move determined: {move}")
+                return moves_dict, board.fen(), board
 
-                # Find the piece making the move
-                piece_symbol = " "
-                matching_piece = None
-                for piece, moves in moves_dict.items():
-                    if move in moves:
-                        piece_symbol = piece[0]
-                        matching_piece = piece
-                        break
+            move = src + dst
+            print(f"Move determined: {move}")
 
-                if not matching_piece:
-                    print(f"🚨 WARNING: No legal move found for {move} 🚨")
-                    return moves_dict, board.fen(), board
+            # Find the piece making the move
+            piece_symbol = None
+            matching_piece = None
+            for piece, moves in moves_dict.items():
+                if move in moves:
+                    piece_symbol = piece[0]
+                    matching_piece = piece
+                    break
 
-                print(f"Moving PIECE: {piece_symbol} from {src} to {dst}")
+            if not matching_piece:
+                print(f"🚨 WARNING: No legal move found for {move} 🚨")
+                return moves_dict, board.fen(), board
 
-                # Convert source and destination to board indices
-                src_file_index = self.file_to_index(src[0][0])
-                src_rank_index = self.rank_to_index(src[0][1])
-                dst_file_index = self.file_to_index(dst[0][0])
-                dst_rank_index = self.rank_to_index(dst[0][1])
+            print(f"Moving PIECE: {piece_symbol} from {src} to {dst}")
 
-                # Create the move using python-chess
-                src_square = chess.square(src_file_index, src_rank_index)
-                dst_square = chess.square(dst_file_index, dst_rank_index)
-                
-                # Check if this is a capture move
-                is_capture = board.is_capture(chess.Move(src_square, dst_square))
-
-                if is_capture:
-                    print("CAPTURE DETECTED")
-                    # Remove the captured piece
-                    board.remove_piece_at(dst_square)
-
-                # Remove the piece from the source square
-                board.remove_piece_at(src_square)
-
-                # Place the piece at the destination square
-                piece_obj = chess.Piece.from_symbol(piece_symbol)
-                board.set_piece_at(dst_square, piece_obj)
-
-                # Update the FEN string
-                fen_string = board.fen()
-                print(f"New FEN: {fen_string}")
-
-                # Remove the used move from moves_dict to prevent reuse
-                if matching_piece and move in moves_dict.get(matching_piece, []):
-                    moves_dict[matching_piece].remove(move)
-                    if not moves_dict[matching_piece]:
-                        del moves_dict[matching_piece]
-
-                print(f"Updated Moves Dict: {moves_dict}")
-
-                return moves_dict, fen_string, board
+            # Convert squares to board indices
+            src_square = chess.parse_square(src)
+            dst_square = chess.parse_square(dst)
             
+            # Create and validate the move
+            move_obj = chess.Move(src_square, dst_square)
+            if move_obj not in board.legal_moves:
+                print(f"🚨 WARNING: Illegal move attempted: {move} 🚨")
+                return moves_dict, board.fen(), board
+
+            # Make the move on the board
+            board.push(move_obj)
+
+            # Update turn in FEN string
+            if chance:  # Human's turn
+                fen_parts = board.fen().split()
+                fen_parts[1] = 'w'  # Set to white's turn
+                new_fen = ' '.join(fen_parts)
+                board.set_fen(new_fen)
+            else:  # Robot's turn
+                fen_parts = board.fen().split()
+                fen_parts[1] = 'b'  # Set to black's turn
+                new_fen = ' '.join(fen_parts)
+                board.set_fen(new_fen)
+
+            # Initialize piece counters for both colors
+            piece_counters = {'P': 0, 'N': 0, 'B': 0, 'R': 0, 'Q': 0, 'K': 0,
+                            'p': 0, 'n': 0, 'b': 0, 'r': 0, 'q': 0, 'k': 0}
+            
+            # Create new moves dictionary
+            updated_moves_dict = {}
+            
+            # Calculate legal moves for both colors
+            for square in chess.SQUARES:
+                piece = board.piece_at(square)
+                if piece:
+                    symbol = piece.symbol()
+                    piece_counters[symbol] += 1
+                    piece_id = f"{symbol}_{piece_counters[symbol]}"
+                    
+                    # Calculate legal moves for this piece
+                    legal_moves = []
+                    for move in board.legal_moves:
+                        if move.from_square == square:
+                            legal_moves.append(
+                                chess.square_name(move.from_square) + 
+                                chess.square_name(move.to_square)
+                            )
+                    
+                    # Only add if the piece has legal moves
+                    if legal_moves:
+                        updated_moves_dict[piece_id] = legal_moves
+
+            print(f"Updated Moves Dictionary: {updated_moves_dict}")
+            print(f"New FEN string: {board.fen()}")
+
+            return updated_moves_dict, board.fen(), board
+                
         except Exception as e:
-            print(f"❌ Unexpected error occured during updating Board state: {e}")
-
-
+            print(f"❌ Error updating board state: {e}")
+            return moves_dict, board.fen(), board
+        
     def save_board_state(self) -> None:
         """Save current board state to files."""
         # Save occupied positions
@@ -779,21 +870,33 @@ class ChessboardProcessor :
         self.save_string_to_file(self.board.fen(), self.fen_path)
 
     def generate_board_visuals(self) -> None:
-        """Generate and save visual representations of the board."""
+        """Generate and save visual representations of the board with proper cleanup."""
+        # Generate SVG
         board_svg = chess.svg.board(board=self.board, size=400, coordinates=False)
+        
+        # Save SVG with proper cleanup
         with open(self.svg_path, "w") as svg_file:
             svg_file.write(board_svg)
+        
+        # Convert to PNG with proper resource handling
         with wand.image.Image() as image:
             image.read(blob=board_svg.encode('utf-8'), format="svg")
             png_image = image.make_blob("png32")
-        with open(self.png_path, "wb") as out:
-            out.write(png_image)
+            with open(self.png_path, "wb") as out:
+                out.write(png_image)
+        
+        # Ensure files are properly closed and resources released
+        # cv2.destroyAllWindows()
 
     def display_board(self) -> None:
-        """Display the current board state."""
+        """Display the current board state with proper window handling."""
+        # Read the latest PNG
         img = cv2.imread(self.png_path)
-        cv2.imshow('Board', img)
-        cv2.waitKey(1000)
+        if img is not None:
+            cv2.imshow('Actual Board', img)
+            cv2.waitKey(1)  # Short delay to allow window to update
+        else:
+            print("Warning: Failed to load board image")
 
 
 if __name__ == '__main__':
