@@ -120,7 +120,7 @@ try:
         api_key=API_KEY, # chess-corner-detection/1
         video_reference=0 , # To Use Mobile camera stream as webcam - 1, For video use - "../media/document_6064252294466113797.mp4"
         on_prediction=my_custom_sink,
-        confidence=0.25    )
+        confidence=0.20    )
 except Exception as e:
     print(f"ERROR : {e} :-- Camera Not Connected")
 

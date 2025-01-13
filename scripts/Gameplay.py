@@ -50,7 +50,9 @@ class ChessRobotController:
     # Move type constants
     SIMPLE_MOVE = 0
     ATTACK_MOVE = 1
-    CASTLING_MOVE = 2
+    CASTLING_KS_MOVE = 2
+    CASTLING_QS_MOVE = 3
+
 
     def __init__(self, 
                  stockfish_path=STOCKFISH_PATH, 
@@ -207,10 +209,18 @@ class ChessRobotController:
             move_type = self.SIMPLE_MOVE  # Default to simple move
 
             # Check if move is castling
-            if (self.board.piece_at(move.from_square).piece_type == chess.KING and
-                abs(move.from_square % 8 - move.to_square % 8) > 1):
-                move_type = self.CASTLING_MOVE
+            ks_castling,qs_castling = self.check_white_castling_availability(self.board)
+            # if (self.board.piece_at(move.from_square).piece_type == chess.KING and
+            #     abs(move.from_square % 8 - move.to_square % 8) > 1):
+            #     move_type = self.CASTLING_MOVE
+
             # Check if move is an attack
+            if ks_castling:
+                print("KS Castling")
+                move_type = self.CASTLING_KS_MOVE
+            elif qs_castling:
+                print("QS Castling")
+                move_type = self.CASTLING_QS_MOVE
             elif isinstance(self.occupied_pos.get(destination), list):
                 move_type = self.ATTACK_MOVE
 
@@ -219,7 +229,36 @@ class ChessRobotController:
         except Exception as e:
             print(f"Error in get_best_move: {e}")
             return None, None, None
-        
+    
+
+    def check_white_castling_availability(self,board):
+        can_castle_kingside = False
+        can_castle_queenside = False
+        print("Castling Checkkk")
+        # Check if White can castle kingside
+        if (board.piece_at(chess.E1) == chess.KING and
+            board.piece_at(chess.H1) == chess.ROOK and
+            not board.is_under_attack(chess.E1) and
+            board.piece_at(chess.F1) is None and
+            board.piece_at(chess.G1) is None and
+            not board.has_moved(chess.E1) and
+            not board.has_moved(chess.H1)):
+            can_castle_kingside = True
+
+        # Check if White can castle queenside
+        if (board.piece_at(chess.E1) == chess.KING and
+            board.piece_at(chess.A1) == chess.ROOK and
+            not board.is_under_attack(chess.E1) and
+            board.piece_at(chess.B1) is None and
+            board.piece_at(chess.C1) is None and
+            board.piece_at(chess.D1) is None and
+            not board.has_moved(chess.E1) and
+            not board.has_moved(chess.A1)):
+            can_castle_queenside = True
+
+        return can_castle_kingside, can_castle_queenside
+
+
     def check_game_ending_state(self, fen_string: str) -> bool:
         """
         Check if the game has reached an ending state before FEN validation
@@ -446,7 +485,8 @@ class ChessRobotController:
                         move_type_str = {
                             self.SIMPLE_MOVE: "SIMPLE",
                             self.ATTACK_MOVE: "ATTACK",
-                            self.CASTLING_MOVE: "CASTLING"
+                            self.CASTLING_KS_MOVE: "CASTLING_KS",
+                            self.CASTLING_QS_MOVE: "CASTLING_QS",
                         }[move_type]
                         
                         print(f"Robot moving from {src} --> {dst} Move type: {move_type_str}")

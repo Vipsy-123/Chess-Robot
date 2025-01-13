@@ -9,7 +9,7 @@ import time
 model = get_roboflow_model(model_id="che-jqbyk/6", api_key="5wYIwfVPqdeD3B9yZMfU")
 
 # Define NMS parameters
-conf_thresh = 0.01  # Confidence threshold
+conf_thresh = 0.005  # Confidence threshold
 iou_thresh = 0.50   # IOU threshold
 max_detections = 32 # Maximum number of detections
 

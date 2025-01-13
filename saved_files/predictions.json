@@ -1,1 +1,38 @@
-[]
+[
+    {
+        "detection_id": "f0b17e93-b27a-4668-ac6e-3f11d0976aae",
+        "class_name": "3",
+        "class_id": 5,
+        "bounding_box": {
+            "x": 587.0,
+            "y": 603.5,
+            "width": 56.0,
+            "height": 63.0
+        },
+        "confidence": 0.8021817207336426
+    },
+    {
+        "detection_id": "eedf1976-2121-4a85-a57b-eb577bce33ee",
+        "class_name": "12",
+        "class_id": 3,
+        "bounding_box": {
+            "x": 73.0,
+            "y": 624.0,
+            "width": 76.0,
+            "height": 76.0
+        },
+        "confidence": 0.5197712779045105
+    },
+    {
+        "detection_id": "a2ebbeb7-8f22-409a-9e8d-fc0c577f4d5d",
+        "class_name": "11",
+        "class_id": 2,
+        "bounding_box": {
+            "x": 73.0,
+            "y": 606.0,
+            "width": 76.0,
+            "height": 76.0
+        },
+        "confidence": 0.4210374057292938
+    }
+]

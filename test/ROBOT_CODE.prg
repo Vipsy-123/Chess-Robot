@@ -3,11 +3,10 @@
 ' It communicates with an external device via a COM port and moves chess pieces.
 ' The script reads data from the COM port, decides the piece to move, and executes the move accordingly.
 ' Functions are provided to handle piece movement and attack.
-
 Function Main
+    Mvs PHome ' Move to Home Position
     Open "COM2:" As #1
     Input #1,Data1,Data2,Data3
-
     'PSRC Decision'
     Select Data1
     Case 1
@@ -206,7 +205,6 @@ Function Main
         PSRC = PHome
         Break
     End Select
-    
       ' PDEST cases
     Select Data2
     Case 1
@@ -405,7 +403,6 @@ Function Main
         PDEST = PHome
         Break
     End Select
-
     If Data3 = 1 Then
         PieceAttack(PSRC,PDEST)
     Else
@@ -413,47 +410,37 @@ Function Main
     EndIf
     Print #1,Data1,Data2,Data3
 FEnd
-
 Function P PieceMove(PSRC,PDEST)
 Mvs PHome ' Move to Home Position
-HClose 1 ' Open gripper
-Dly 0.2
-Mvs PSRC,-50
+M_Out(15)=0       'grip open
+Mvs PSRC,-75
 Mvs PSRC
-HOpen 1 ' Close gripper
-Dly 0.2
-Mvs PSRC,-50
-Mvs PDEST,-50
+M_Out(15)=1  'grip close
+Mvs PSRC,75
+Mvs PDEST,-75
 Mvs PDEST
-HClose 1 ' Open gripper
-Dly 0.2
-Mvs PDEST, -50
+M_Out(15)=0       'grip open
+Mvs PDEST, -75
 Mvs PHome
 FEnd
-
 Function P PieceAttack(PSRC,PDEST)
 Mvs PHome ' Move to Home Position
-HClose 1 ' Open gripper
-Dly 0.2
-Mvs PDEST,-50
+M_Out(15)=0       'grip open
+Mvs PDEST,-75
 Mvs PDEST
-HOpen 1 ' Close gripper
-Dly 0.2
-Mvs PDEST,-50
-Mvs POUT,-50
+M_Out(15)=1  'grip close
+Mvs PDEST,-75
+Mvs POUT,-75
 Mvs POUT
-HClose 1 ' Open gripper
-Dly 0.2
-Mvs POUT, -50
-Mvs PSRC,-50
+M_Out(15)=0       'grip open
+Mvs POUT, -75
+Mvs PSRC,-75
 Mvs PSRC
-HOpen 1 ' Close gripper
-Dly 0.2
-Mvs PSRC,-50
-Mvs PDEST,-50
+M_Out(15)=1  'grip close
+Mvs PSRC,-75
+Mvs PDEST,-75
 Mvs PDEST
-HClose 1 ' Open gripper
-Dly 0.2
-Mvs PDEST, -50
+M_Out(15)=0       'grip open
+Mvs PDEST, -75
 Mvs PHome
 FEnd
