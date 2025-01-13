@@ -68,7 +68,8 @@ class ChessRobotController:
         self.game_state = ChessGameState.NORMAL
         # Initialize chess board
         self.board = chess.Board()
-        self.fen_string = self.board.fen()
+        # self.fen_string = self.board.fen()
+        self.fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1"
         # Initialize chess engine
         self.engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
         self.processor = ChessboardProcessor()
@@ -209,7 +210,9 @@ class ChessRobotController:
             move_type = self.SIMPLE_MOVE  # Default to simple move
 
             # Check if move is castling
-            ks_castling,qs_castling = self.check_white_castling_availability(self.board)
+            fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1"
+            board = chess.Board(fen)
+            ks_castling,qs_castling = self.check_white_castling_availability(board)
             # if (self.board.piece_at(move.from_square).piece_type == chess.KING and
             #     abs(move.from_square % 8 - move.to_square % 8) > 1):
             #     move_type = self.CASTLING_MOVE
@@ -243,6 +246,7 @@ class ChessRobotController:
             board.piece_at(chess.G1) is None and
             not board.has_moved(chess.E1) and
             not board.has_moved(chess.H1)):
+            print("IN")
             can_castle_kingside = True
 
         # Check if White can castle queenside
@@ -254,6 +258,7 @@ class ChessRobotController:
             board.piece_at(chess.D1) is None and
             not board.has_moved(chess.E1) and
             not board.has_moved(chess.A1)):
+            print("IN")
             can_castle_queenside = True
 
         return can_castle_kingside, can_castle_queenside
@@ -416,7 +421,7 @@ class ChessRobotController:
             self.processor.display_board()
 
             self.moves_dict = self.processor.get_legal_moves(self.fen_string)
-
+            print(self.fen_string)
             if self.fen_string is None:
                 print("❌ Error reading FEN string")
                 continue
