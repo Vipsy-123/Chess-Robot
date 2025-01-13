@@ -46,6 +46,12 @@ class ChessPositionError(Exception):
     pass
 
 class ChessRobotController:
+
+    # Move type constants
+    SIMPLE_MOVE = 0
+    ATTACK_MOVE = 1
+    CASTLING_MOVE = 2
+
     def __init__(self, 
                  stockfish_path=STOCKFISH_PATH, 
                  host='192.168.0.20', 
@@ -159,8 +165,8 @@ class ChessRobotController:
             print(f"Error analyzing position: {e}")
             return {'state': ChessGameState.NORMAL}
 
-    def get_best_move(self, fen_string: str) -> Tuple[Optional[str], Optional[str], Optional[bool]]:
-        """Get best move using python-chess with enhanced error handling."""
+    def get_best_move(self, fen_string: str) -> Tuple[Optional[str], Optional[str], Optional[int]]:
+        """Get best move using python-chess with enhanced error handling and move type detection."""
         try:
             print("IN get moves")
             # First check game state
@@ -181,9 +187,9 @@ class ChessRobotController:
             
             # Check if game is over
             if self.game_state in [ChessGameState.WHITE_CHECKMATE, 
-                                 ChessGameState.BLACK_CHECKMATE, 
-                                 ChessGameState.STALEMATE, 
-                                 ChessGameState.DRAW]:
+                                ChessGameState.BLACK_CHECKMATE, 
+                                ChessGameState.STALEMATE, 
+                                ChessGameState.DRAW]:
                 return None, None, None
             
             # Get best move from engine
@@ -197,10 +203,18 @@ class ChessRobotController:
             source = chess.square_name(move.from_square)
             destination = chess.square_name(move.to_square)
             
-            # Check if destination square is occupied by checking for a list with color info
-            is_attack = isinstance(self.occupied_pos.get(destination), list)
+            # Determine move type
+            move_type = self.SIMPLE_MOVE  # Default to simple move
 
-            return source, destination, is_attack
+            # Check if move is castling
+            if (self.board.piece_at(move.from_square).piece_type == chess.KING and
+                abs(move.from_square % 8 - move.to_square % 8) > 1):
+                move_type = self.CASTLING_MOVE
+            # Check if move is an attack
+            elif isinstance(self.occupied_pos.get(destination), list):
+                move_type = self.ATTACK_MOVE
+
+            return source, destination, move_type
             
         except Exception as e:
             print(f"Error in get_best_move: {e}")
@@ -348,103 +362,115 @@ class ChessRobotController:
 
    
     def main(self):
-        """Main game loop."""
+        """Main game loop with enhanced move validation and move type handling."""
         print("\n🎮 WELCOME TO CHESS ROBOT GAME 🎮")
         print("Press SPACE to start each turn...")
-        
-        
         
         while True:
             if keyboard.is_pressed('space'):
                 self.occupied_pos = self.processor.get_occupied_positions()
                 break
+
         while True:
-                # Display the board and read FEN string
-                self.processor.generate_board_visuals()
-                self.processor.display_board()
+            # Display the board and read FEN string
+            self.processor.generate_board_visuals()
+            self.processor.display_board()
 
-                self.moves_dict = self.processor.get_legal_moves(self.fen_string)
+            self.moves_dict = self.processor.get_legal_moves(self.fen_string)
 
-                if self.fen_string is None:
-                    print("❌ Error reading FEN string")
-                    continue
+            if self.fen_string is None:
+                print("❌ Error reading FEN string")
+                continue
+            
+            # Check for game-ending state first
+            if self.check_game_ending_state(self.fen_string):
+                print("\n🏁 GAME OVER 🏁")
+                break
+            
+            # Check other game states
+            if self.game_state in [ChessGameState.WHITE_CHECKMATE, 
+                                ChessGameState.BLACK_CHECKMATE, 
+                                ChessGameState.STALEMATE, 
+                                ChessGameState.DRAW]:
+                print("\n🏁 GAME OVER 🏁")
+                break
+
+            # HUMAN TURN
+            if self.human_move:
+                print("\n👤 Human Player's Turn 👤")
+                print("Press SPACE when you've completed your move...")
                 
-                # Check for game-ending state first
-                if self.check_game_ending_state(self.fen_string):
-                    print("\n🏁 GAME OVER 🏁")
-                    break
-                
-                # Check other game states (checkmate, stalemate, etc.)
-                if self.game_state in [ChessGameState.WHITE_CHECKMATE, 
-                                    ChessGameState.BLACK_CHECKMATE, 
-                                    ChessGameState.STALEMATE, 
-                                    ChessGameState.DRAW]:
-                    print("\n🏁 GAME OVER 🏁")
-                    break
-
-                # HUMAN TURN
-                if self.human_move:
-                    print("\n👤 Human Player's Turn 👤")
-                    print("Press SPACE when you've completed your move...")
-                    
-                    while True:
-                        self.processor.generate_board_visuals()
-                        self.processor.display_board()
-                        if keyboard.is_pressed('space'):
-                            time.sleep(3)
-                            print("Processing move....")
+                while True:
+                    self.processor.generate_board_visuals()
+                    self.processor.display_board()
+                    if keyboard.is_pressed('space'):
+                        time.sleep(3)
+                        print("Processing move....")
+                        # Update board state and validate move
+                        results = self.processor.diff_checker(
+                            self.occupied_pos, 
+                            self.processor.get_occupied_positions(),
+                            self.moves_dict,
+                            True
+                        )
+                        
+                        # Only proceed if a valid move is detected
+                        if results['src'] and results['dst']:
                             self.robot_move = True
                             self.human_move = False
+                            self.update_board_state(1)
                             break
-                        time.sleep(0.1)
+                        else:
+                            print("❌ No valid move detected. Please make your move and press SPACE again.")
+                    time.sleep(0.1)
 
-                    # Update the board state after human's move
-                    self.update_board_state(1)
+            # ROBOT TURN
+            if self.robot_move:
+                print("\n🤖 Robot's Turn 🤖")
+                try:
+                    # Get best move and execute it
+                    src, dst, move_type = self.get_best_move(self.fen_string)
 
-                # ROBOT TURN
-                if self.robot_move:
-                    print("\n🤖 Robot's Turn 🤖")
-                    try:
-                        # Get best move and execute it
-                        src, dst, is_attack = self.get_best_move(self.fen_string)
+                    if src is None or dst is None:
+                        print("Unable to make move, skipping robot's turn")
+                        continue
 
-                        if src is None or dst is None:
-                            print("Unable to make move, skipping robot's turn")
-                            self.robot_move = True
-                            self.human_move = False
-                            return
+                    # Send move to robot
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                        s.connect((self.host, self.port))
 
-                        # Send move to robot (through socket or other communication)
-                        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                            s.connect((self.host, self.port))
+                        src_num = SQUARE_MAPPING[src]
+                        dst_num = SQUARE_MAPPING[dst]
+                        
+                        # Print move type in human-readable format
+                        move_type_str = {
+                            self.SIMPLE_MOVE: "SIMPLE",
+                            self.ATTACK_MOVE: "ATTACK",
+                            self.CASTLING_MOVE: "CASTLING"
+                        }[move_type]
+                        
+                        print(f"Robot moving from {src} --> {dst} Move type: {move_type_str}")
+                        move_data = f'{src_num},{dst_num},{move_type}'.encode()
+                        s.sendall(move_data)
 
-                            attack = 1 if is_attack else 0
+                        # Receive the response from the robot
+                        response = s.recv(1024)
+                        print('✅ Robot move successfully executed:', repr(response))
 
-                            src_num = SQUARE_MAPPING[src]
-                            dst_num = SQUARE_MAPPING[dst]
-                            print(f"Robot moving from {src} --> {dst} ATTACK {attack}")
-                            move_data = f'{src_num},{dst_num},{attack}'.encode()
-                            s.sendall(move_data)
+                        self.robot_move = False
+                        self.human_move = True
 
-                            # Receive the response from the robot
-                            response = s.recv(1024)
-                            print('✅ Robot move successfully executed:', repr(response))
+                        time.sleep(2)
 
-                            self.robot_move = False
-                            self.human_move = True
+                        # Update board state after robot's move
+                        self.update_board_state(0)
 
-                            time.sleep(2)
-
-                            # Update board state after robot's move
-                            self.update_board_state(0)
-
-                    except socket.error as err:
-                        print(f"❌ Socket error: {err}")
-                    except Exception as e:
-                        print(f"❌ Unexpected error during robot move: {e}")
-                
-                time.sleep(0.1)
-
+                except socket.error as err:
+                    print(f"❌ Socket error: {err}")
+                except Exception as e:
+                    print(f"❌ Unexpected error during robot move: {e}")
+            
+            time.sleep(0.1)
 
 def main():
     try:
