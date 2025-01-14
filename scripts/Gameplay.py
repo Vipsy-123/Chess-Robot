@@ -69,7 +69,7 @@ class ChessRobotController:
         # Initialize chess board
         self.board = chess.Board()
         # self.fen_string = self.board.fen()
-        self.fen_string = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK2R w KQkq - 0 1"
+        self.fen_string = "rnbqkbnr/pppppppp/8/8/8/2PBBP2/PP4PP/R3K2R w KQkq - 0 1"
         # Initialize chess engine
         self.engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
         self.processor = ChessboardProcessor()
@@ -234,32 +234,16 @@ class ChessRobotController:
             return None, None, None
     
 
-    def check_white_castling_availability(self,board):
-        can_castle_kingside = False
-        can_castle_queenside = False
+    def check_white_castling_availability(self, board):
         print("Castling Checkkk")
-        # Check if White can castle kingside
-        if (board.piece_at(chess.E1) == chess.KING and
-            board.piece_at(chess.H1) == chess.ROOK and
-            not board.is_under_attack(chess.E1) and
-            board.piece_at(chess.F1) is None and
-            board.piece_at(chess.G1) is None and
-            not board.has_moved(chess.E1) and
-            not board.has_moved(chess.H1)):
-            print("IN")
-            can_castle_kingside = True
+        print(self.fen_string)
 
-        # Check if White can castle queenside
-        if (board.piece_at(chess.E1) == chess.KING and
-            board.piece_at(chess.A1) == chess.ROOK and
-            not board.is_under_attack(chess.E1) and
-            board.piece_at(chess.B1) is None and
-            board.piece_at(chess.C1) is None and
-            board.piece_at(chess.D1) is None and
-            not board.has_moved(chess.E1) and
-            not board.has_moved(chess.A1)):
-            print("IN")
-            can_castle_queenside = True
+        # Use built-in castling rights checks
+        can_castle_kingside = board.has_kingside_castling_rights(chess.WHITE)
+        can_castle_queenside = board.has_queenside_castling_rights(chess.WHITE)
+
+        print(can_castle_kingside)
+        print(can_castle_queenside)
 
         return can_castle_kingside, can_castle_queenside
 
