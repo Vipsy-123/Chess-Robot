@@ -1,6 +1,6 @@
 '  SVR Robotics
-'  Author : Vipul Pardeshi 
-'  Description :
+'  Author : Vipul Pardeshi
+'  Description : CHESS_ROBOT_CODE
 '  This script is responsible for controlling a robotic arm to play Chess Game.
 '  Visit this Website for Robot Code Upload and Data Link Layer Setup -https://shorturl.at/Xidwx
 '  It communicates with an external device via a COM port and moves chess pieces.
@@ -8,13 +8,16 @@
 '  Functions are provided to handle piece movement and attack.
 '  Data1 is Position from where Robot Should Pick the Piece
 '  Data2 is Position to where Robot should place the Piece
-'  Data3 corresponds to Move Type : 
+'  Data3 corresponds to Move Type :
 '    It can be  1 -> Simple Move   2 -> Attack Move   3 -> Kingside Castling   4 -> Queenside Castling
 '  Accordingly Functions are called and after Robot move is complete it returns
-
 Function Main
     Mvs PHome ' Move to Home Position
+    button_click_waitt()
+    M_Out(13)=0  'Green LED OFF
+    M_Out(12)=1  'Red LED ON
     Open "COM2:" As #1
+    Print #1,1
     Input #1,Data1,Data2,Data3
     'PSRC Decision'
     Select Data1
@@ -419,92 +422,102 @@ Function Main
         PDEST1 = Pg1
         PSRC2 = Ph1
         PDEST2 = Pf1
-        PieceKSCastling(PSRC1,PDEST2,PSRC2,PDEST2)
+        PieceKSCastling(PSRC1,PDEST1,PSRC2,PDEST2)
     ElseIf Data3 = 3 Then
         PSRC1 = Pe1
         PDEST1 = Pb1
         PSRC2 = Pa1
         PDEST2 = Pc1
-        PieceQSCastling(PSRC1,PDEST2,PSRC2,PDEST2)
+        PieceQSCastling(PSRC1,PDEST1,PSRC2,PDEST2)
     Else
         PieceMove(PSRC,PDEST)
     EndIf
     Print #1,Data1,Data2,Data3
+    Dly 3
+    M_Out(13)=1  'Green LED ON
+    M_Out(12)=0  'Red LED OFF
+    'While (M_In(15) = 0)
+    '    Dly 0.1
+   ' WEnd
+FEnd
+Function button_click_waitt()
+    While (M_In(15) = 0)
+        Dly 0.1
+    WEnd
 FEnd
 Function P PieceMove(PSRC,PDEST)
 Mvs PHome ' Move to Home Position
 M_Out(15)=0       'grip open
-Mvs PSRC,-60
+Mvs PSRC,-100
 Mvs PSRC
 M_Out(15)=1  'grip close
-Mvs PSRC,-60
-Mvs PDEST,-60
+Mvs PSRC,-100
+Mvs PDEST,-100
 Mvs PDEST
 M_Out(15)=0       'grip open
-Mvs PDEST, -60
+Mvs PDEST, -100
 Mvs PHome
 FEnd
 Function P PieceAttack(PSRC,PDEST)
 Mvs PHome ' Move to Home Position
 M_Out(15)=0       'grip open
-Mvs PDEST,-60
+Mvs PDEST,-100
 Mvs PDEST
 M_Out(15)=1  'grip close
-Mvs PDEST,-60
-Mvs POUT,-60
+Mvs PDEST,-100
+Mvs POUT,-100
 Mvs POUT
 M_Out(15)=0       'grip open
-Mvs POUT, -60
-Mvs PSRC,-60
+Mvs POUT, -100
+Mvs PSRC,-100
 Mvs PSRC
 M_Out(15)=1  'grip close
-Mvs PSRC,-60
-Mvs PDEST,-60
+Mvs PSRC,-100
+Mvs PDEST,-100
 Mvs PDEST
 M_Out(15)=0       'grip open
-Mvs PDEST, -60
+Mvs PDEST, -100
 Mvs PHome
 FEnd
 Function P PieceKSCastling(PSRC1,PDEST1,PSRC2,PDEST2)
 Mvs PHome ' Move to Home Position
 M_Out(15)=0       'grip open
-Mvs PSRC1,-60
+Mvs PSRC1,-100
 Mvs PSRC1
 M_Out(15)=1  'grip close
-Mvs PSRC1,-60
-Mvs PDEST1,-60
+Mvs PSRC1,-100
+Mvs PDEST1,-100
 Mvs PDEST1
 M_Out(15)=0       'grip open
-Mvs PDEST1, -60
-Mvs PSRC2,-60
+Mvs PDEST1, -100
+Mvs PSRC2,-100
 Mvs PSRC2
 M_Out(15)=1  'grip close
-Mvs PSRC2,-60
-Mvs PDEST2,-60
+Mvs PSRC2,-100
+Mvs PDEST2,-100
 Mvs PDEST2
 M_Out(15)=0       'grip open
-Mvs PDEST2, -60
+Mvs PDEST2, -100
 Mvs PHome
 FEnd
 Function P PieceQSCastling(PSRC1,PDEST1,PSRC2,PDEST2)
 Mvs PHome ' Move to Home Position
 M_Out(15)=0       'grip open
-Mvs PSRC1,-60
+Mvs PSRC1,-100
 Mvs PSRC1
 M_Out(15)=1  'grip close
-Mvs PSRC1,-60
-Mvs PDEST1,-60
+Mvs PSRC1,-100
+Mvs PDEST1,-100
 Mvs PDEST1
 M_Out(15)=0       'grip open
-Mvs PDEST1, -60
-Mvs PSRC2,-60
+Mvs PDEST1, -100
+Mvs PSRC2,-100
 Mvs PSRC2
 M_Out(15)=1  'grip close
-Mvs PSRC2,-60
-Mvs PDEST2,-60
+Mvs PSRC2,-100
+Mvs PDEST2,-100
 Mvs PDEST2
 M_Out(15)=0       'grip open
-Mvs PDEST2, -60
+Mvs PDEST2, -100
 Mvs PHome
 FEnd
-
