@@ -2,7 +2,8 @@
 
 **AutomatedChessRobot** is a cutting-edge project designed to automate chess gameplay on 6 Dof Articulated Robotic Arm by Mitsubishi by leveraging advanced computer vision, machine learning, and robotics. The project integrates the powerful YOLOv5 object detection model, the world-class Stockfish chess engine, and the precise RT Toolbox, all orchestrated through Python.
 
-![WhatsApp Image 2024-08-16 at 11 46 08 PM](https://github.com/user-attachments/assets/7d979ca2-9dfb-425b-b2cf-e189a586156c)
+### Object Detection Flow
+![Chess-robot](https://github.com/user-attachments/assets/943e5c9b-c953-40f2-be41-1516096fe48a)
 
 ## Key Components
 
