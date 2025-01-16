@@ -10,10 +10,36 @@ import cv2
 import chess
 import chess.svg
 import wand.image
-import numpy as np
 import os
 from enum import Enum
+import logging
+import os
 
+# Ensure the 'logs' directory exists
+log_directory = './logs'
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory)
+
+# Create logger
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+# Create file handler for logging to file
+file_handler = logging.FileHandler(f'{log_directory}/debug.log', encoding='utf-8')
+file_handler.setLevel(logging.DEBUG)
+
+# Create formatter and add it to file handler
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+file_handler.setFormatter(formatter)
+
+# Add file handler to logger
+logger.addHandler(file_handler)
+
+# (Optional) Create console handler for logging to console (set level to INFO or higher)
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)  # Optional: Only log INFO and higher to console
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 
 # Global configuration remains the same
 OCCUPIED_POS_PATH = '../saved_files/occupied_positions.json'
@@ -31,6 +57,16 @@ SQUARE_MAPPING = {
     'f1': 41, 'f2': 42, 'f3': 43, 'f4': 44, 'f5': 45, 'f6': 46, 'f7': 47, 'f8': 48,
     'g1': 49, 'g2': 50, 'g3': 51, 'g4': 52, 'g5': 53, 'g6': 54, 'g7': 55, 'g8': 56,
     'h1': 57, 'h2': 58, 'h3': 59, 'h4': 60, 'h5': 61, 'h6': 62, 'h7': 63, 'h8': 64
+}
+
+PLAYSTATE_MAPPING = {
+    0 : "SETUP",
+    1 : "ROBOT_PLAYING",
+    2 : "ROBOT_COMM_COMPLETE",
+    3 : "ROBOT_PLAYING_DONE",
+    4 : "HUMAN_PLAYING",
+    5 : "HUMAN_COMM_COMPLETE",
+    6 : "HUMAN_PLAYING_DONE" 
 }
 
 class ChessGameState:
@@ -72,6 +108,7 @@ class ChessRobotController:
                  port=10002,
                  fen_string = None, 
                  move = "R",
+                 ps = PlayState.SETUP.value
                  ):
         
         self.host = host
@@ -80,26 +117,29 @@ class ChessRobotController:
         self.init_stockfish(stockfish_path)
         self.game_state = ChessGameState.NORMAL
         self.play_state = PlayState.SETUP.value
+        self.src = None
+        self.dst = None
 
         # Initialize chess board
         if fen_string is None :
-            print("Initialising FEN and Board")
+            logger.info("Initialising FEN and Board")
             self.board = chess.Board()
             self.board.set_castling_fen("-")
             self.fen_string = self.board.fen()
             
         else:
-            print("Re-initialising FEN and Board")
+            logger.info("Re-initialising FEN and Board")
             self.fen_string = fen_string
             self.board = chess.Board(fen=self.fen_string)
             self.game_state = ChessGameState.RETRY
+            self.play_state = ps
         
         if move == "R":
-            print("Init Robot")
+            logger.info("Init Robot Move")
             self.robot_move = True
             self.human_move = False
         elif move == "H":
-            print("Init Human")
+            logger.info("Init Human Move")
             self.robot_move = False
             self.human_move = True
 
@@ -125,7 +165,7 @@ class ChessRobotController:
                 }
             )
         except Exception as e:
-            print(f"Stockfish initialization error: {e}")
+            logger.error(f"Stockfish initialization error: {e}")
             raise
     
     @staticmethod
@@ -135,7 +175,7 @@ class ChessRobotController:
             with open(file_path) as json_file:
                 return json.load(json_file)
         except (json.JSONDecodeError, FileNotFoundError) as e:
-            print(f"Error loading JSON from {file_path}: {e}")
+            logger.error(f"Error loading JSON from {file_path}: {e}")
             return {}
     
     @staticmethod
@@ -145,7 +185,7 @@ class ChessRobotController:
             with open(filename, 'r') as file:
                 return file.read().strip()
         except Exception as e:
-            print(f"Error reading file {filename}: {e}")
+            logger.error(f"Error reading file {filename}: {e}")
             return None
         
     def __del__(self):
@@ -198,13 +238,13 @@ class ChessRobotController:
             return info
             
         except Exception as e:
-            print(f"Error analyzing position: {e}")
+            logger.info(f"Error analyzing position: {e}")
             return {'state': ChessGameState.NORMAL}
 
     def get_best_move(self, fen_string: str) -> Tuple[Optional[str], Optional[str], Optional[int]]:
         """Get best move using python-chess with enhanced error handling and move type detection."""
         try:
-            print("Getting Best moves")
+            logger.info("Getting Best moves")
             # First check game state
             if self.check_game_ending_state(fen_string):
                 return None, None, None
@@ -231,9 +271,9 @@ class ChessRobotController:
             # Get best move from engine
             result = self.engine.play(self.board, chess.engine.Limit(time=2.0))
             if result.move is None:
-                print(f"❌ ERROR : GET_BEST_MOVE --> Engine Failed to get best moves ❌")
+                logger.error(f"❌ ERROR : GET_BEST_MOVE --> Engine Failed to get best moves ❌")
                 error_handler(fen_string=self.fen_string,state=self.play_state)
-                print("🚨Quiting🚨")
+                logger.info("🚨Quiting🚨")
                 exit(0)
             
             # Convert move to string format
@@ -251,10 +291,10 @@ class ChessRobotController:
 
             # Check if move is an attack
             if ks_castling:
-                print("KS Castling")
+                logger.info("KS Castling")
                 move_type = self.CASTLING_KS_MOVE
             elif qs_castling:
-                print("QS Castling")
+                logger.info("QS Castling")
                 move_type = self.CASTLING_QS_MOVE
             elif isinstance(self.occupied_pos.get(destination), list):
                 move_type = self.ATTACK_MOVE
@@ -262,17 +302,17 @@ class ChessRobotController:
             return source, destination, move_type
             
         except Exception as e:
-            print(f"❌ ERROR : GET_BEST_MOVE -->  {e}")
+            logger.error(f"❌ ERROR : GET_BEST_MOVE -->  {e}")
             error_handler(fen_string=self.fen_string,state=self.play_state)
-            print("🚨Quiting🚨")
+            logger.info("🚨Quiting🚨")
             exit(0)
             
             # return None, None, None
     
 
     def check_white_castling_availability(self, board):
-        # print("Castling Checkkk")
-        print(self.fen_string)
+        # logger.info("Castling Checkkk")
+        logger.info(self.fen_string)
 
         # Check if White has kingside castling rights
         can_castle_kingside = board.has_kingside_castling_rights(chess.WHITE)
@@ -286,9 +326,9 @@ class ChessRobotController:
         # Check if the squares B1, C1, and D1 are empty for queenside castling
         qs_clear = self.occupied_pos.get("b1", 0) == 0 and self.occupied_pos.get("c1", 0) == 0 and self.occupied_pos.get("d1", 0) == 0
 
-        # Print the results for debugging
-        # print(f"Kingside castling: {can_castle_kingside and ks_clear}")
-        # print(f"Queenside castling: {can_castle_queenside and qs_clear}")
+        # logger.info the results for debugging
+        # logger.info(f"Kingside castling: {can_castle_kingside and ks_clear}")
+        # logger.info(f"Queenside castling: {can_castle_queenside and qs_clear}")
 
         # Return the availability of castling
         return (can_castle_kingside and ks_clear), (can_castle_queenside and qs_clear)
@@ -321,7 +361,7 @@ class ChessRobotController:
             return False
             
         except Exception as e:
-            print(f"Error checking game state: {e}")
+            logger.error(f"Error checking game state: {e}")
             return False
 
     def display_game_state(self, state: str) -> None:
@@ -338,9 +378,9 @@ class ChessRobotController:
         if state in state_messages:
             message = state_messages[state]
             border = "=" * (len(message) - 2)  # -2 for the newlines
-            print(border)
-            print(message, end='')
-            print(border)
+            logger.info(border)
+            logger.info(message)
+            logger.info(border)
 
     def validate_fen(self, fen_string: str) -> bool:
         """
@@ -351,7 +391,7 @@ class ChessRobotController:
             # Split FEN into its components
             parts = fen_string.split()
             if len(parts) != 6:
-                print("Invalid FEN: Wrong number of fields")
+                logger.warning("Invalid FEN: Wrong number of fields")
                 return False
             
             position = parts[0]
@@ -359,7 +399,7 @@ class ChessRobotController:
             # Validate board structure
             ranks = position.split('/')
             if len(ranks) != 8:
-                print("Invalid FEN: Wrong number of ranks")
+                logger.warning("Invalid FEN: Wrong number of ranks")
                 return False
             
             for rank in ranks:
@@ -370,13 +410,13 @@ class ChessRobotController:
                     else:
                         space_count += 1
                 if space_count != 8:
-                    print("Invalid FEN: Invalid rank length")
+                    logger.warning("Invalid FEN: Invalid rank length")
                     return False
             
             return True
             
         except Exception as e:
-            print(f"FEN validation error: {e}")
+            logger.error(f"FEN validation error: {e}")
             return False
 
 
@@ -395,30 +435,39 @@ class ChessRobotController:
         Args:
             chance: Boolean indicating whose turn it is (True for human, False for robot)
         """
-        print("Starting board state update...")
+        logger.info("Starting board state update...")
+        logger.info(f"Before Moves Dict {self.moves_dict}")
         
         # Get new position information
-        print("5.1: Getting new occupied positions")
+        logger.info("5.1: Getting new occupied positions")
         new_pos = self.processor.get_occupied_positions()
         
-        print("5.2: Checking position differences")
-        results = self.processor.diff_checker(
-            self.occupied_pos, 
-            new_pos,
-            moves_dict=self.moves_dict,
-            chance=chance,
-            fen_string=self.fen_string,
-            play_state=self.play_state
-
-        )
+        logger.info("5.2: Checking position differences")
+        if chance :
+            logger.info("H")
+            results = self.processor.diff_checker(
+                self.occupied_pos, 
+                new_pos,
+                moves_dict=self.moves_dict,
+                chance=chance,
+                fen_string=self.fen_string,
+                play_state=self.play_state
+            )
+        else: 
+            logger.info("R")
+            results = {
+                "src" : [self.src],
+                "dst" : [self.dst]
+            }
         
-        print("5.3: Updating occupied positions")
+        logger.info("5.3: Updating occupied positions")
+        logger.info(f" Occupied Pos :{new_pos}")
         self.occupied_pos = new_pos
         self.processor.save_json_data(self.occupied_pos,OCCUPIED_POS_PATH)
         
 
         # Update internal board state
-        print("5.4: Updating board state")
+        logger.info("5.4: Updating board state")
         self.moves_dict, self.fen_string, self.board = self.processor.update_fen_from_occupied_pos(
             results=results, 
             moves_dict=self.moves_dict, 
@@ -429,72 +478,72 @@ class ChessRobotController:
         )
         
         # Get fresh legal moves for the new position
-        print("5.5: Refreshing legal moves dictionary")
+        logger.info("5.5: Refreshing legal moves dictionary")
+        logger.info(f"FEN {self.fen_string}")
         self.moves_dict = self.processor.get_legal_moves(self.fen_string)
         
         # Update visual representation
-        print("5.6: Updating visual display")
+        logger.info("5.6: Updating visual display")
         self.processor.board = self.board  # Sync processor's board with current state
         self.processor.generate_board_visuals()
         self.processor.display_board()
-        print(f"Moves Dict {self.moves_dict}")
+        logger.info(f"Final Moves Dict {self.moves_dict}")
 
 
     def main(self):
         """Main game loop with enhanced move validation and move type handling."""
-        print("Press Button to start each turn...")
-        print(f"Game State {self.game_state}")
+        logger.info("Press Button to start each turn...")
+        logger.info(f"Game State {self.game_state}")
         if self.game_state == ChessGameState.NORMAL:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 try:
                     s.connect((self.host, self.port))
                     while True:
                         data = s.recv(1024)
-                        print(data)
-                        print("ROBOT PLAYING .... Normal")
+                        logger.info(data)
+                        logger.info("ROBOT PLAYING .... Normal")
                         if data:
                             self.occupied_pos = self.processor.get_occupied_positions()
                             self.game_state = ChessGameState.RETRY
-                            print(f"Game state {self.game_state}")
+                            logger.info(f"Game state {self.game_state}")
                             break
                         elif data == b'':  # Handle empty data as connection termination
-                            print(" 🚨 Empty data received. Closing connection.")
+                            logger.error(" 🚨 Empty data received. Closing connection.")
                             # self.game_state = ChessGameState.RETRY
                             # s.close()
                             time.sleep(1)
                             error_handler(fen_string=self.fen_string, move="H")
-                            print("🚨Quiting🚨")
+                            logger.info("🚨Quiting🚨")
                             exit(0)
                             break
                         time.sleep(1)
                 except socket.timeout:
-                    print("No data received, retrying...")
+                    logger.error("No data received, retrying...")
                     error_handler(fen_string=self.fen_string,move="H")
                 except ConnectionRefusedError:
-                    print("Connection refused by the host.")
+                    logger.error("Connection refused by the host.")
                     error_handler(fen_string=self.fen_string,move="H")
                     
         elif self.game_state == ChessGameState.RETRY:
-            print("🚨 Watch Out !🚨")
-            pass
+            logger.warning("🚨 RETRYING 🚨")
+            
 
-       
         while True:
             # Display the board and read FEN string
             self.processor.generate_board_visuals()
             self.processor.display_board()
 
             self.moves_dict = self.processor.get_legal_moves(self.fen_string)
-            print(self.fen_string)
+            logger.info(self.fen_string)
             if self.fen_string is None:
-                print("❌ ERROR : MAIN --> Error reading FEN string ❌")
+                logger.error("❌ ERROR : MAIN --> Error reading FEN string ❌")
                 error_handler(fen_string=self.fen_string,state=self.play_state)
-                print("🚨Quiting🚨")
+                logger.info("🚨Quiting🚨")
                 exit(0)
                            
             # Check for game-ending state first
             if self.check_game_ending_state(self.fen_string):
-                print("\n🏁 GAME OVER 🏁")
+                logger.info("\n🏁 GAME OVER 🏁")
                 break
             
             # Check other game states
@@ -502,15 +551,15 @@ class ChessRobotController:
                                 ChessGameState.BLACK_CHECKMATE, 
                                 ChessGameState.STALEMATE, 
                                 ChessGameState.DRAW]:
-                print("\n🏁 GAME OVER 🏁")
+                logger.info("\n🏁 GAME OVER 🏁")
                 break
 
             # HUMAN TURN
             if self.human_move:
-                print("\n👤 Human Player's Turn 👤")
-                if self.play_state != PlayState.HUMAN_COMM_COMPLETE :
+                logger.info(f"\n👤 Human Player's Turn , Play State : {PLAYSTATE_MAPPING[self.play_state]}👤")
+                if self.play_state != PlayState.HUMAN_COMM_COMPLETE.value :
                 
-                    print("Press SPACE when you've completed your move...")
+                    logger.info("Press SPACE when you've completed your move...")
                     self.play_state = PlayState.HUMAN_PLAYING.value
 
                     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -518,99 +567,104 @@ class ChessRobotController:
                             while True:
                                 self.processor.generate_board_visuals()
                                 self.processor.display_board()
-                                print("Waiting ... PRESS")
+                                # time.sleep(1)
+                                logger.info("Waiting ... PRESS")
                                 # data = s.recv(1024) 
                                 # s.settimeout(5)  # Set timeout to 5 seconds
                                 try:
                                     data = s.recv(1024)
-                                    print(f"Received: {data}")
+                                    logger.info(f"Received: {data}")
 
                                     if data :
                                         self.play_state = PlayState.HUMAN_COMM_COMPLETE.value
-                                        time.sleep(3)
-                                        print("Processing move....")
+                                        time.sleep(4)
+                                        logger.info("Processing move....")
 
                                         # Update board state and validate move
                                         results = self.processor.diff_checker(
                                             self.occupied_pos, 
                                             self.processor.get_occupied_positions(),
                                             self.moves_dict,
-                                            True
+                                            chance=1,
+                                            fen_string=self.fen_string,
+                                            play_state=self.play_state
                                         )
                                         
                                         # Only proceed if a valid move is detected
                                         if results['src'] and results['dst']:
-                                            self.update_board_state(1)
+                                            self.update_board_state(chance=1)
                                             self.robot_move = True
                                             self.human_move = False
                                             self.play_state = PlayState.HUMAN_PLAYING_DONE.value
                                             break
                                         else:
-                                            print("❌ ERROR : MAIN[HUMAN_MOVE] --> No valid move detected. ❌")
+                                            logger.error("❌ ERROR : MAIN[HUMAN_MOVE] --> No valid move detected. ❌")
                                             error_handler(fen_string=self.fen_string,state=self.play_state)
-                                            print("🚨Quiting🚨")
+                                            logger.info("🚨Quiting🚨")
                                             exit(0)
-                                except socket.timeout:
-                                    print("❌ ERROR : MAIN[HUMAN_MOVE] --> Socket Connection failed , no data received. ❌")
+                                except socket.error as e:
+                                    logger.error(f"❌ ERROR : MAIN[HUMAN_MOVE] --> Socket Connection failed :: {e}❌")
                                     error_handler(fen_string=self.fen_string,state=self.play_state)
-                                    print("🚨Quiting🚨")
+                                    logger.info("🚨Quiting🚨")
                                     exit(0)
                                     break
                                 except Exception as e:
-                                    print(f"❌ ERROR : MAIN[HUMAN_MOVE] --> Unexpected error during robot move: {e} ❌")
+                                    logger.error(f"❌ ERROR : MAIN[HUMAN_MOVE] --> Unexpected error during robot move: {e} ❌")
                                     error_handler(fen_string=self.fen_string,state=self.play_state)
-                                    print("🚨Quiting🚨")
+                                    logger.info("🚨Quiting🚨")
                                     exit(0)
                 else:
                     try:
                         time.sleep(2)
-                        print("🚨 WARNING : MAIN[HUMAN_MOVE] --> Attempting to reupdate board state 🚨")
+                        logger.warning("🚨 WARNING : MAIN[HUMAN_MOVE] --> Attempting to reupdate board state 🚨")
 
                         results = self.processor.diff_checker(
-                            self.occupied_pos, 
-                            self.processor.get_occupied_positions(),
-                            self.moves_dict,
-                            True
-                        )
+                                            self.occupied_pos, 
+                                            self.processor.get_occupied_positions(),
+                                            self.moves_dict,
+                                            chance=1,
+                                            fen_string=self.fen_string,
+                                            play_state=self.play_state
+                                        )
                         
                         # Only proceed if a valid move is detected
                         if results['src'] and results['dst']:
-                            self.update_board_state(1)
+                            self.update_board_state(chance = 1)
                             self.robot_move = True
                             self.human_move = False
                             self.play_state = PlayState.HUMAN_PLAYING_DONE.value
                         else:
-                            print("❌ ERROR : MAIN[HUMAN_MOVE] --> No valid move detected. ❌")
+                            logger.error("❌ ERROR : MAIN[HUMAN_MOVE] --> Corners not detected ❌")
                             error_handler(fen_string=self.fen_string,state=self.play_state)
-                            print("🚨Quiting🚨")
+                            logger.info("🚨Quiting🚨")
                             exit(0)        
                     except Exception as e:
-                                    print(f"❌ ERROR : MAIN[HUMAN_MOVE] --> Unexpected error during robot move: {e} ❌")
-                                    error_handler(fen_string=self.fen_string,state=self.play_state)
-                                    print("🚨Quiting🚨")
-                                    exit(0)
+                            logger.error(f"❌ ERROR : MAIN[HUMAN_MOVE] --> Unexpected error during robot move: {e} ❌")
+                            error_handler(fen_string=self.fen_string,state=self.play_state)
+                            logger.info("🚨Quiting🚨")
+                            exit(0)
 
             # ROBOT TURN
             elif self.robot_move:
-                print("\n🤖 Robot's Turn 🤖")
-                if self.play_state != PlayState.ROBOT_COMM_COMPLETE :
+                logger.info(f"\n🤖 Robot's Turn   Play State : {PLAYSTATE_MAPPING[self.play_state]} 🤖")
+                if self.play_state != PlayState.ROBOT_COMM_COMPLETE.value :
 
                     self.play_state = PlayState.ROBOT_PLAYING.value
                     try:
                         # Get best move and execute it
-                        src, dst, move_type = self.get_best_move(self.fen_string)
+                        self.src, self.dst, move_type = self.get_best_move(self.fen_string)
 
-                        if src is None or dst is None:
-                            print("🚨 WARNING: Game has Ended 🚨")
+                        if self.src is None or self.dst is None:
+                            logger.warning("🚨 WARNING: Game has Ended 🚨")
                             break
 
                         # Send move to robot
                         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                             s.connect((self.host, self.port))
 
-                            src_num = SQUARE_MAPPING[src]
-                            dst_num = SQUARE_MAPPING[dst]
-                            # Print move type in human-readable format
+                            src_num = SQUARE_MAPPING[self.src]
+                            dst_num = SQUARE_MAPPING[self.dst]
+                            # logger.info move type in human-readable format
                             move_type_str = {
                                 self.SIMPLE_MOVE: "SIMPLE",
                                 self.ATTACK_MOVE: "ATTACK",
@@ -618,45 +672,45 @@ class ChessRobotController:
                                 self.CASTLING_QS_MOVE: "CASTLING_QS",
                             }[move_type]
                             
-                            print(f"Robot moving from {src} --> {dst} Move type: {move_type_str}")
+                            logger.info(f"Robot moving from {self.src} --> {self.dst} Move type: {move_type_str}")
                             move_data = f'{src_num},{dst_num},{move_type}'.encode()
                             s.sendall(move_data)
 
                             # Receive the response from the robot
                             response = s.recv(1024)
-                            print('✅ Robot move successfully executed:', repr(response))
+                            logger.info(f'✅ Robot move successfully executed: {repr(response)}')
                             self.play_state = PlayState.ROBOT_COMM_COMPLETE.value
 
                             time.sleep(2) # Wait for Camera stabilization before updating board state
 
                             # Update board state after robot's move
-                            self.update_board_state(0)
+                            self.update_board_state(chance = 0)
                             self.robot_move = False
                             self.human_move = True
                             self.play_state = PlayState.ROBOT_PLAYING_DONE.value
 
                     except socket.error as err:
-                        print(f"❌ ERROR : MAIN[ROBOT_MOVE] --> Socket error: {err} ❌")
+                        logger.error(f"❌ ERROR : MAIN[ROBOT_MOVE] --> Socket error: {err} ❌")
                         error_handler(fen_string=self.fen_string,state=self.play_state)
-                        print("🚨Quiting🚨")
+                        logger.info("🚨Quiting🚨")
                         exit(0)
                     except Exception as e:
-                        print(f"❌ ERROR : MAIN[ROBOT_MOVE] --> Unexpected error during robot move: {e} ❌")
+                        logger.error(f"❌ ERROR : MAIN[ROBOT_MOVE] --> Unexpected error during robot move: {e} ❌")
                         error_handler(fen_string=self.fen_string,state=self.play_state)
-                        print("🚨Quiting🚨")
+                        logger.info("🚨Quiting🚨")
                         exit(0)
                 else:
                     try:
                         time.sleep(2)
-                        print("🚨 WARNING : MAIN[ROBOT_MOVE] --> Attempting to reupdate board state 🚨")
+                        logger.warning("🚨 WARNING : MAIN[ROBOT_MOVE] --> Attempting to reupdate board state 🚨")
                         # Update board state after robot's move
-                        self.update_board_state(0)
+                        self.update_board_state(chance = 0)
                         self.robot_move = False
                         self.human_move = True
                     except Exception as e:
-                        print(f"❌ ERROR : MAIN[ROBOT_MOVE] --> Unexpected error during robot move: {e} ❌")
+                        logger.error(f"❌ ERROR : MAIN[ROBOT_MOVE] --> Unexpected error during robot move: {e} ❌")
                         error_handler(fen_string=self.fen_string,state=self.play_state)
-                        print("🚨Quiting🚨")
+                        logger.info("🚨Quiting🚨")
                         exit(0)
             time.sleep(0.1)
 
@@ -712,7 +766,7 @@ class ChessboardProcessor :
             with open(file_path) as json_file:
                 return json.load(json_file)
         except (json.JSONDecodeError, FileNotFoundError) as e:
-            print(f"Error loading JSON from {file_path}: {e}")
+            logger.error(f"Error loading JSON from {file_path}: {e}")
             return {}
     
     def save_json_data(self, data: Dict, file_path: str) -> None:
@@ -780,7 +834,7 @@ class ChessboardProcessor :
             dict: Dictionary with chessboard squares (e.g., 'a1') as keys
                   and 1 for occupied, 0 for unoccupied as values.
         """
-        print("Occupied json updated")
+        logger.info("Occupied json updated")
         board_centers = self.load_json_data(self.centers_path)
         predictions = self.load_json_data(self.predictions_path)
         
@@ -818,7 +872,7 @@ class ChessboardProcessor :
         Returns:
             dict: A dictionary containing legal moves for all pieces of both colors
         """
-        print("Getting legal moves for both sides...")
+        logger.info("Getting legal moves for both sides...")
         
         def get_moves_for_position(board):
             """Helper function to get moves for all pieces in a given position"""
@@ -874,11 +928,11 @@ class ChessboardProcessor :
             # Get all legal moves for both sides
             all_moves = get_moves_for_position(board)
             
-            # print(f"Calculated moves for both sides: {all_moves}")
+            # logger.info(f"Calculated moves for both sides: {all_moves}")
             return all_moves
             
         except Exception as e:
-            print(f"Error calculating legal moves: {e}")
+            logger.error(f"Error calculating legal moves: {e}")
             return {}
 
     def diff_checker(self, old_dict, new_dict, moves_dict, chance, fen_string , play_state):
@@ -896,8 +950,12 @@ class ChessboardProcessor :
         Returns:
             dict: Contains 'src' and 'dst' lists of affected squares
         """
-        print("In Diff checker")
+        logger.info("In Diff checker")
         try:
+            logger.info(f"Old Dict {old_dict}")
+            logger.info(f"New Dict {new_dict}")
+            logger.info(f"Moves Dict {moves_dict}")
+
             def get_occupancy_value(value):
                 """Extract occupancy value (0 or 1) from position data."""
                 if isinstance(value, list):
@@ -939,6 +997,8 @@ class ChessboardProcessor :
                             dst_squares.append(square)
 
             # Validate moves against legal moves dictionary
+            logger.info(f"src_squares {src_squares}")
+            logger.info(f"Dst Squares {dst_squares}")
             validated_dst = []
             for dst in dst_squares:
                 for moves in moves_dict.values():
@@ -946,18 +1006,19 @@ class ChessboardProcessor :
                     if any(move[2:4] == dst and move[:2] in src_squares for move in moves):
                         validated_dst.append(dst)
                         break
+            logger.info(f"Valid Dst Squares {validated_dst}")
 
             results = {
                 "src": src_squares,
                 "dst": list(set(validated_dst))  # Remove any duplicates
             }
             
-            print(f"Detected changes - Source: {results['src']}, Destination: {results['dst']}")
+            logger.info(f"Detected changes - Source: {results['src']}, Destination: {results['dst']}")
             return results
         except Exception as e:
-            print(f" ❌ ERROR : DIFF_CHECKER --> {e} ❌")
+            logger.error(f" ❌ ERROR : DIFF_CHECKER --> {e} ❌")
             error_handler(fen_string=fen_string,state=play_state)
-            print("🚨Quiting🚨")
+            logger.info("🚨Quiting🚨")
             exit(0)
 
     # Function to convert file to 0-indexed integer
@@ -982,39 +1043,53 @@ class ChessboardProcessor :
             tuple: Updated moves_dict, FEN string, and board
         """
         try:
-            print("Processing move results...")
-            print(results)
+            logger.info("Processing move results...")
+            logger.info(results)
 
-            src = results.get("src", [None])[0]
-            dst = results.get("dst", [None])[0]
+            # Get source and destination
+            src_list = results.get("src", [None])
+            dst_list = results.get("dst", [None])
             fen = board.fen()
-            if src is None or dst is None:
-                print(" ❌ ERROR : UPDATE_FEN -->  Source or Destination square is missing. ❌")
-                error_handler(fen_string=fen_string,state=play_state)
-                print("🚨Quiting🚨")
+
+            # Validate source and destination
+            if not src_list or not dst_list:
+                logger.error(" ❌ ERROR : UPDATE_FEN -->  Source or Destination square is missing. ❌")
+                error_handler(fen_string=fen, state=play_state)
+                logger.info("🚨 Quitting 🚨")
                 exit(0)
-                # return moves_dict, board.fen(), board
 
-            move = src + dst
-            print(f"Move determined: {move}")
-
-            # Find the piece making the move
+            # Iterate through all possible source squares and destination squares and check for a valid move
+            move = None
             piece_symbol = None
             matching_piece = None
-            for piece, moves in moves_dict.items():
-                if move in moves:
-                    piece_symbol = piece[0]
-                    matching_piece = piece
-                    break
+            for src in src_list:
+                for dst in dst_list:
+                    potential_move = src + dst  # Combine source and destination into a move string
+                    logger.info(f"Trying move: {potential_move}")
 
-            if not matching_piece:
-                print(f" ❌ ERROR : UPDATE_FEN -->   No legal move found for {move} ❌")
-                error_handler(fen_string=fen_string,state=play_state)
-                print("🚨Quiting🚨")
+                    # Check if the move is valid for any piece in moves_dict
+                    for piece, moves in moves_dict.items():
+                        if potential_move in moves:
+                            piece_symbol = piece[0]
+                            matching_piece = piece
+                            move = potential_move
+                            break  # Stop once a valid move is found
+
+                    if move:  # If a valid move is found, no need to check further
+                        break  # Exit the inner loop once a valid move is found
+
+                if move:  # If a valid move is found, no need to check further
+                    break  # Exit the outer loop once a valid move is found
+
+            if move:
+                logger.info(f"Move determined: {move}")
+            else:
+                logger.error(f" ❌ ERROR : UPDATE_FEN --> No valid move found for {src_list} to {dst_list} ❌")
+                error_handler(fen_string=fen, state=play_state)
+                logger.info("🚨 Quitting 🚨")
                 exit(0)
-                # return moves_dict, board.fen(), board
 
-            print(f"Moving PIECE: {piece_symbol} from {src} to {dst}")
+            logger.info(f"Moving PIECE: {piece_symbol} from {src} to {dst}")
 
             # Convert squares to board indices
             src_square = chess.parse_square(src)
@@ -1023,9 +1098,9 @@ class ChessboardProcessor :
             # Create and validate the move
             move_obj = chess.Move(src_square, dst_square)
             if move_obj not in board.legal_moves:
-                print(f"❌ ERROR : UPDATE_FEN -->  Illegal move attempted: {move} 🚨")
+                logger.error(f"❌ ERROR : UPDATE_FEN -->  Illegal move attempted: {move} 🚨")
                 error_handler(fen_string=fen_string,state=play_state)
-                print("🚨Quiting🚨")
+                logger.info("🚨Quiting🚨")
                 exit(0)
                 # return moves_dict, board.fen(), board
 
@@ -1072,23 +1147,23 @@ class ChessboardProcessor :
                     if legal_moves:
                         updated_moves_dict[piece_id] = legal_moves
 
-            # print(f"Updated Moves Dictionary: {updated_moves_dict}")
-            print(f"New FEN string: {board.fen()}")
+            # logger.info(f"Updated Moves Dictionary: {updated_moves_dict}")
+            logger.info(f"New FEN string: {board.fen()}")
 
             return updated_moves_dict, board.fen(), board
                 
         except Exception as e:
-            print(f"❌ ERROR : UPDATE_FEN --> Error updating board state: {e} ❌")
+            logger.error(f"❌ ERROR : UPDATE_FEN --> Error updating board state: {e} ❌")
             error_handler(fen_string=fen_string,state=play_state)
-            print("🚨Quiting🚨")
+            logger.info("🚨Quiting🚨")
             exit(0)
             # if chance:
             #     error_handler(fen_string=board.fen(),move="H")
-            #     print("🚨Quiting🚨")
+            #     logger.info("🚨Quiting🚨")
             #     exit(0)
             # else:
             #     error_handler(fen_string=board.fen(),move="R")
-            #     print("🚨Quiting🚨")
+            #     logger.info("🚨Quiting🚨")
             #     exit(0)
             # return moves_dict, board.fen(), board
         
@@ -1127,10 +1202,11 @@ class ChessboardProcessor :
             cv2.imshow('Actual Board', img)
             cv2.waitKey(1)  # Short delay to allow window to update
         else:
-            print("🚨 WARNING : DISPLAY_BOARD --> Failed to load board image 🚨")
+            logger.warning("🚨 WARNING : DISPLAY_BOARD --> Failed to load board image 🚨")
 
 def error_handler(fen_string,state):
-    print(f"⚙️ Handling Error ⚙️")
+    logger.info(f"⚙️ Handling Error for {PLAYSTATE_MAPPING[state]}⚙️")
+    time.sleep(3)
     try:
         if state in [PlayState.SETUP.value,
                      PlayState.ROBOT_PLAYING.value,
@@ -1142,26 +1218,26 @@ def error_handler(fen_string,state):
                        PlayState.HUMAN_COMM_COMPLETE.value] :
             move = "H"
 
-        chess_controller = ChessRobotController(fen_string=fen_string,move=move)
+        chess_controller = ChessRobotController(fen_string=fen_string,move=move,ps=state)
         chess_controller.game_state == ChessGameState.RETRY
         chess_controller.main()
     except KeyboardInterrupt as e:
-        print(f"❌ GAME ENDED ❌")
+        logger.error(f"❌ GAME ENDED ❌")
         raise
     except Exception as e:
-        print(f"❌ Fatal error: {e} ❌")
+        logger.error(f"❌ Fatal error: {e} ❌")
         raise
 
 def main():
     try:
-        print("\n🎮 WELCOME TO CHESS ROBOT GAME 🎮")
+        logger.info("\n🎮 WELCOME TO CHESS ROBOT GAME 🎮")
         chess_controller = ChessRobotController()
         chess_controller.main()
     except KeyboardInterrupt as e:
-        print(f"❌ GAME ENDED ❌")
+        logger.error(f"❌ GAME ENDED ❌")
         raise
     except Exception as e:
-        print(f"❌ Fatal error: {e}")
+        logger.error(f"❌ Fatal error: {e}")
         raise
 
 if __name__ == '__main__':

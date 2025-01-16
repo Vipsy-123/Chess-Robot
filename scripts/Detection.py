@@ -6,7 +6,7 @@ import json
 import time
 
 # Load the model
-model = get_roboflow_model(model_id="che-jqbyk/6", api_key="5wYIwfVPqdeD3B9yZMfU")
+model = get_roboflow_model(model_id="chesss-13h9s/1", api_key="RPYuTqY5jRZN1rFzLT0J")
 
 # Define NMS parameters
 conf_thresh = 0.005  # Confidence threshold
@@ -109,7 +109,8 @@ while True:
         print("Total Objects Detected:", object_count)
 
         # Display the annotated image
-        cv2.imshow("Annotated Image", annotated_image)
+        resized_image = cv2.resize(annotated_image, (500, 500))
+        cv2.imshow("Annotated Image", resized_image)
         # Wait for 1 second (1000 milliseconds)
         cv2.waitKey(2000)
 
