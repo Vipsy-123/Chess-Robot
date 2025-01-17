@@ -6,10 +6,10 @@ import json
 import time
 
 # Load the model
-model = get_roboflow_model(model_id="chesss-13h9s/1", api_key="RPYuTqY5jRZN1rFzLT0J")
-
+# model = get_roboflow_model(model_id="chess-piece-detection-2ektl/1", api_key="HJvYKNeTxx2SYy6MqYVL")
+model = get_roboflow_model(model_id="che-jqbyk/3", api_key="5wYIwfVPqdeD3B9yZMfU")
 # Define NMS parameters
-conf_thresh = 0.005  # Confidence threshold
+conf_thresh = 0  # Confidence threshold
 iou_thresh = 0.50   # IOU threshold
 max_detections = 32 # Maximum number of detections
 
@@ -34,7 +34,7 @@ while True:
         object_count = 0
         existing_predictions = []
         for prediction in results.predictions:
-            if prediction.confidence > conf_thresh :
+            # if prediction.confidence > conf_thresh :
                 if(prediction.class_name == "1" or prediction.class_name == "7" or  prediction.class_name == "3" or prediction.class_name == "9"):
                     prediction_dict = {
                         "detection_id": prediction.detection_id,
@@ -98,8 +98,8 @@ while True:
             
             #     existing_predictions.append(prediction_dict)
             
-            predictions_data.append(prediction_dict)
-            object_count += 1
+                predictions_data.append(prediction_dict)
+                object_count += 1
 
         # Write the predictions data to a JSON file
         with open("../saved_files/predictions.json", "w") as json_file:

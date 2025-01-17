@@ -1,0 +1,16 @@
+chess piece annotation no:
+
+1 B Bishop     उंट
+2 B King       राजा
+3 B Knight     घोडा
+4 B Pawn     प्यादे
+5 B Queen     राणी
+6 B Rook     हत्ती
+7 W Bishop    उंट
+8 W King     राजा
+9 W Knight    घोडा
+10 W Pawn    प्यादे
+11 W Queen    राणी
+12 W Rook     हत्ती
+
+chess-board-model/2

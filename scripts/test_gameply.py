@@ -202,39 +202,39 @@ class ChessRobotController:
         try:
             # First check for game-ending states
             if self.check_game_ending_state(fen_string):
-                return {'state': self.game_state}
+                return self.game_state
             
             # Set up the position on our chess board
             self.board.set_fen(fen_string)
             
             # Initialize position info
-            info = {}
+            info = None
             
             # Check for checkmate
             if self.board.is_checkmate():
-                info['state'] = (ChessGameState.WHITE_CHECKMATE 
+                info = (ChessGameState.WHITE_CHECKMATE 
                                if self.board.turn == chess.WHITE 
                                else ChessGameState.BLACK_CHECKMATE)
                 return info
             
             # Check for stalemate
             if self.board.is_stalemate():
-                info['state'] = ChessGameState.STALEMATE
+                info = ChessGameState.STALEMATE
                 return info
             
             # Check for draw
             if self.board.is_insufficient_material() or self.board.is_fifty_moves() or self.board.is_repetition():
-                info['state'] = ChessGameState.DRAW
+                info = ChessGameState.DRAW
                 return info
             
             # Check for check
             if self.board.is_check():
-                info['state'] = (ChessGameState.WHITE_IN_CHECK 
+                info = (ChessGameState.WHITE_IN_CHECK 
                                if self.board.turn == chess.WHITE 
                                else ChessGameState.BLACK_IN_CHECK)
             else:
-                info['state'] = ChessGameState.NORMAL
-                
+                info = ChessGameState.NORMAL
+            self.display_game_state(self.game_state)
             return info
             
         except Exception as e:
@@ -257,9 +257,7 @@ class ChessRobotController:
                 return None, None, None
             
             # Get position analysis
-            position_info = self.analyze_position(fen_string)
-            self.game_state = position_info['state']
-            self.display_game_state(self.game_state)
+            self.game_state = self.analyze_position(fen_string)
             
             # Check if game is over
             if self.game_state in [ChessGameState.WHITE_CHECKMATE, 
@@ -532,6 +530,7 @@ class ChessRobotController:
             # Display the board and read FEN string
             self.processor.generate_board_visuals()
             self.processor.display_board()
+            self.game_state = self.analyze_position(self.fen_string)
 
             self.moves_dict = self.processor.get_legal_moves(self.fen_string)
             logger.info(self.fen_string)
@@ -542,8 +541,11 @@ class ChessRobotController:
                 exit(0)
                            
             # Check for game-ending state first
-            if self.check_game_ending_state(self.fen_string):
-                logger.info("\n🏁 GAME OVER : CHECKMATE 🏁")
+            if self.game_state in [ChessGameState.WHITE_CHECKMATE, 
+                                ChessGameState.BLACK_CHECKMATE, 
+                                ChessGameState.STALEMATE, 
+                                ChessGameState.DRAW]:
+                logger.info("\n🏁 GAME OVER 🏁")
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                             s.connect((self.host, self.port))
 
@@ -554,14 +556,6 @@ class ChessRobotController:
                             response = s.recv(1024)
                             logger.info(f'✅ Robot got the message: {repr(response)}')
                 break
-            
-            # Check other game states
-            # if self.game_state in [ChessGameState.WHITE_CHECKMATE, 
-            #                     ChessGameState.BLACK_CHECKMATE, 
-            #                     ChessGameState.STALEMATE, 
-            #                     ChessGameState.DRAW]:
-            #     logger.info("\n🏁 GAME OVER 🏁")
-            #     break
 
             # HUMAN TURN
             if self.human_move:
@@ -586,7 +580,7 @@ class ChessRobotController:
 
                                     if data :
                                         self.play_state = PlayState.HUMAN_COMM_COMPLETE.value
-                                        time.sleep(4)
+                                        time.sleep(7)
                                         logger.info("Processing move....")
 
                                         # Update board state and validate move
@@ -653,8 +647,31 @@ class ChessRobotController:
                             logger.info("🚨Quiting🚨")
                             exit(0)
 
+            self.processor.generate_board_visuals()
+            self.processor.display_board()
+            self.game_state = self.analyze_position(self.fen_string)
+            # Check for game-ending state first
+            if self.game_state in [ChessGameState.WHITE_CHECKMATE, 
+                                ChessGameState.BLACK_CHECKMATE, 
+                                ChessGameState.STALEMATE, 
+                                ChessGameState.DRAW]:
+                logger.info("\n🏁 GAME OVER 🏁")
+                logger.info("\nPRESS BUTTON TO CONTINUE")
+
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                            s.connect((self.host, self.port))
+
+                            time.sleep(15)
+                            move_data = f'0,0,0'.encode()
+                            s.sendall(move_data)
+
+                            # Receive the response from the robot
+                            response = s.recv(1024)
+                            logger.info(f'✅ Robot got the message: {repr(response)}')
+                break
+
             # ROBOT TURN
-            elif self.robot_move:
+            if self.robot_move:
                 logger.info(f"\n🤖 Robot's Turn   Play State : {PLAYSTATE_MAPPING[self.play_state]} 🤖")
                 if self.play_state != PlayState.ROBOT_COMM_COMPLETE.value :
 
@@ -882,6 +899,7 @@ class ChessboardProcessor :
         # Log unmatched predictions
         if unmatched_predictions:
             logger.warning(f"🚨 WARNING : GET_OCCUPIED_POS --> Unmatched predictions found: {unmatched_predictions} 🚨")
+            logger.warning(f"Piece is {prediction['class_name']}")
 
         self.save_json_data(occupied_positions, self.occupied_pos_path)
 
@@ -1212,13 +1230,18 @@ class ChessboardProcessor :
         # Ensure files are properly closed and resources released
         # cv2.destroyAllWindows()
 
-    def display_board(self,final=None) -> None:
+    def display_board(self, final=None) -> None:
         """Display the current board state with proper window handling."""
-        # Read the latest PNG
+        # Check if the file exists and load the image
+        if not os.path.exists(self.png_path):
+            logger.warning(f"🚨 WARNING: File does not exist: {self.png_path} 🚨")
+            return
+
         img = cv2.imread(self.png_path)
         if img is not None:
             cv2.imshow('Actual Board', img)
-            cv2.waitKey(1)  # Short delay to allow window to update
+            cv2.waitKey(1)  # Short delay to allow the window to update
+            
             if final is not None:
                 self.move_count += 1
                 # Save the image in the 'saved_images' directory
@@ -1226,9 +1249,10 @@ class ChessboardProcessor :
                 os.makedirs(saved_images_path, exist_ok=True)
                 move_filename = f"{self.move_count}.png"
                 move_image_path = os.path.join(saved_images_path, move_filename)
-                cv2.imwrite(move_image_path, move_filename)
+                cv2.imwrite(move_image_path, img)
         else:
-            logger.warning("🚨 WARNING : DISPLAY_BOARD --> Failed to load board image 🚨")
+            logger.warning("🚨 WARNING: DISPLAY_BOARD --> Failed to load board image 🚨")
+
 
 def error_handler(fen_string,state):
     logger.info(f"⚙️ Handling Error for {PLAYSTATE_MAPPING[state]}⚙️")

@@ -20,7 +20,7 @@ Function Main
     Print #1,1
     Input #1,Data1,Data2,Data3
 
-    ` Check Game Over condition 
+    ' Check Game Over condition 
     If Data1 = 0  Then
         M_Out(13)=1  'Green LED ON
         M_Out(12)=1  'Red LED ON
