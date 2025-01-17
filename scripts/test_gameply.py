@@ -460,15 +460,10 @@ class ChessRobotController:
                 "dst" : [self.dst]
             }
         
-        logger.info("5.3: Updating occupied positions")
-        logger.info(f" Occupied Pos :{new_pos}")
-        self.occupied_pos = new_pos
-        self.processor.save_json_data(self.occupied_pos,OCCUPIED_POS_PATH)
-        
-
+      
         # Update internal board state
-        logger.info("5.4: Updating board state")
-        self.moves_dict, self.fen_string, self.board = self.processor.update_fen_from_occupied_pos(
+        logger.info("5.3: Updating board state")
+        self.moves_dict, self.fen_string, self.board = self.processor.update_move_dict_fen_from_occupied_pos(
             results=results, 
             moves_dict=self.moves_dict, 
             board=self.board,
@@ -478,15 +473,20 @@ class ChessRobotController:
         )
         
         # Get fresh legal moves for the new position
-        logger.info("5.5: Refreshing legal moves dictionary")
+        logger.info("5.4: Refreshing legal moves dictionary")
         logger.info(f"FEN {self.fen_string}")
         self.moves_dict = self.processor.get_legal_moves(self.fen_string)
         
         # Update visual representation
-        logger.info("5.6: Updating visual display")
+        logger.info("5.5: Updating visual display")
         self.processor.board = self.board  # Sync processor's board with current state
         self.processor.generate_board_visuals()
-        self.processor.display_board()
+        self.processor.display_board(final=True)
+
+        logger.info("5.6: Updating occupied positions")
+        # logger.info(f" Occupied Pos :{new_pos}")
+        self.occupied_pos = new_pos
+        self.processor.save_json_data(self.occupied_pos,OCCUPIED_POS_PATH)
         logger.info(f"Final Moves Dict {self.moves_dict}")
 
 
@@ -543,16 +543,25 @@ class ChessRobotController:
                            
             # Check for game-ending state first
             if self.check_game_ending_state(self.fen_string):
-                logger.info("\n🏁 GAME OVER 🏁")
+                logger.info("\n🏁 GAME OVER : CHECKMATE 🏁")
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                            s.connect((self.host, self.port))
+
+                            move_data = f'0,0,0'.encode()
+                            s.sendall(move_data)
+
+                            # Receive the response from the robot
+                            response = s.recv(1024)
+                            logger.info(f'✅ Robot got the message: {repr(response)}')
                 break
             
             # Check other game states
-            if self.game_state in [ChessGameState.WHITE_CHECKMATE, 
-                                ChessGameState.BLACK_CHECKMATE, 
-                                ChessGameState.STALEMATE, 
-                                ChessGameState.DRAW]:
-                logger.info("\n🏁 GAME OVER 🏁")
-                break
+            # if self.game_state in [ChessGameState.WHITE_CHECKMATE, 
+            #                     ChessGameState.BLACK_CHECKMATE, 
+            #                     ChessGameState.STALEMATE, 
+            #                     ChessGameState.DRAW]:
+            #     logger.info("\n🏁 GAME OVER 🏁")
+            #     break
 
             # HUMAN TURN
             if self.human_move:
@@ -582,9 +591,9 @@ class ChessRobotController:
 
                                         # Update board state and validate move
                                         results = self.processor.diff_checker(
-                                            self.occupied_pos, 
-                                            self.processor.get_occupied_positions(),
-                                            self.moves_dict,
+                                            old_dict=self.occupied_pos, 
+                                            new_dict=self.processor.get_occupied_positions(),
+                                            moves_dict=self.moves_dict,
                                             chance=1,
                                             fen_string=self.fen_string,
                                             play_state=self.play_state
@@ -619,9 +628,9 @@ class ChessRobotController:
                         logger.warning("🚨 WARNING : MAIN[HUMAN_MOVE] --> Attempting to reupdate board state 🚨")
 
                         results = self.processor.diff_checker(
-                                            self.occupied_pos, 
-                                            self.processor.get_occupied_positions(),
-                                            self.moves_dict,
+                                            old_dict=self.occupied_pos, 
+                                            new_dict=self.processor.get_occupied_positions(),
+                                            moves_dict=self.moves_dict,
                                             chance=1,
                                             fen_string=self.fen_string,
                                             play_state=self.play_state
@@ -747,7 +756,8 @@ class ChessboardProcessor :
         self.board = chess.Board()  # Start with the standard chess configuration
         self.board.set_castling_fen("-")
         self.occupied_positions = self.initialize_occupied_positions_from_fen(self.EMPTY_BOARD_FEN)
-       
+        self.move_count = 0
+
     
     @staticmethod
     def _file_to_index(file: str) -> int:
@@ -780,12 +790,23 @@ class ChessboardProcessor :
             file.write(string_data)
     
     def find_closest_square(self, pred_x: float, pred_y: float, 
-                           board_centers: Dict) -> Optional[str]:
-        """Find the closest chess square for given coordinates."""
+                        board_centers: Dict) -> Optional[str]:
+        """
+        Find the closest chess square for given coordinates.
+        
+        Args:
+            pred_x (float): X-coordinate of the prediction.
+            pred_y (float): Y-coordinate of the prediction.
+            board_centers (dict): Dictionary of board square centers.
+        
+        Returns:
+            Optional[str]: The closest square's name or None if not found.
+        """
         for square, (square_x, square_y) in board_centers.items():
             if (abs(square_x - pred_x) <= self.PREDICTION_THRESHOLD and 
                 abs(square_y - pred_y) <= self.PREDICTION_THRESHOLD):
                 return square
+        # No square found within the threshold
         return None
     
     def initialize_occupied_positions_from_fen(self, fen: str) -> Dict[str, list]:
@@ -832,16 +853,15 @@ class ChessboardProcessor :
         
         Returns:
             dict: Dictionary with chessboard squares (e.g., 'a1') as keys
-                  and 1 for occupied, 0 for unoccupied as values.
+                and 1 for occupied, 0 for unoccupied as values.
         """
         logger.info("Occupied json updated")
         board_centers = self.load_json_data(self.centers_path)
         predictions = self.load_json_data(self.predictions_path)
         
-        # Reset board and occupied positions
-        # self.board = chess.Board(fen=self.EMPTY_BOARD_FEN)
-        # self.occupied_positions = self._initialize_occupied_positions()
         occupied_positions = {}
+        unmatched_predictions = []  # List to track unmatched predictions
+        
         # Process each prediction
         for prediction in predictions:
             pred_x = prediction["bounding_box"]["x"]
@@ -850,14 +870,20 @@ class ChessboardProcessor :
             closest_square = self.find_closest_square(pred_x, pred_y, board_centers)
             
             if closest_square:
-
                 # Mark square as occupied
                 if int(prediction['class_name']) >= 7:
-                    occupied_positions[closest_square] = ["W",1]
+                    occupied_positions[closest_square] = ["W", 1]
                 elif int(prediction['class_name']) < 7:
-                    occupied_positions[closest_square] = ["B",1]
+                    occupied_positions[closest_square] = ["B", 1]
+            else:
+                # Add unmatched predictions for logging
+                unmatched_predictions.append((pred_x, pred_y))
 
-        self.save_json_data(occupied_positions,self.occupied_pos_path)
+        # Log unmatched predictions
+        if unmatched_predictions:
+            logger.warning(f"🚨 WARNING : GET_OCCUPIED_POS --> Unmatched predictions found: {unmatched_predictions} 🚨")
+
+        self.save_json_data(occupied_positions, self.occupied_pos_path)
 
         return occupied_positions
 
@@ -1029,7 +1055,7 @@ class ChessboardProcessor :
     def rank_to_index(self,rank):
         return int(rank) - 1
 
-    def update_fen_from_occupied_pos(self, results, moves_dict, board, chance,fen_string , play_state):
+    def update_move_dict_fen_from_occupied_pos(self, results, moves_dict, board, chance,fen_string , play_state):
         """
         Update the chess board state and moves dictionary based on detected moves and captures.
         
@@ -1157,15 +1183,7 @@ class ChessboardProcessor :
             error_handler(fen_string=fen_string,state=play_state)
             logger.info("🚨Quiting🚨")
             exit(0)
-            # if chance:
-            #     error_handler(fen_string=board.fen(),move="H")
-            #     logger.info("🚨Quiting🚨")
-            #     exit(0)
-            # else:
-            #     error_handler(fen_string=board.fen(),move="R")
-            #     logger.info("🚨Quiting🚨")
-            #     exit(0)
-            # return moves_dict, board.fen(), board
+
         
     def save_board_state(self) -> None:
         """Save current board state to files."""
@@ -1194,13 +1212,21 @@ class ChessboardProcessor :
         # Ensure files are properly closed and resources released
         # cv2.destroyAllWindows()
 
-    def display_board(self) -> None:
+    def display_board(self,final=None) -> None:
         """Display the current board state with proper window handling."""
         # Read the latest PNG
         img = cv2.imread(self.png_path)
         if img is not None:
             cv2.imshow('Actual Board', img)
             cv2.waitKey(1)  # Short delay to allow window to update
+            if final is not None:
+                self.move_count += 1
+                # Save the image in the 'saved_images' directory
+                saved_images_path = "saved_images"
+                os.makedirs(saved_images_path, exist_ok=True)
+                move_filename = f"{self.move_count}.png"
+                move_image_path = os.path.join(saved_images_path, move_filename)
+                cv2.imwrite(move_image_path, move_filename)
         else:
             logger.warning("🚨 WARNING : DISPLAY_BOARD --> Failed to load board image 🚨")
 
