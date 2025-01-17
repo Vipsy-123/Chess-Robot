@@ -19,6 +19,36 @@ Function Main
     Open "COM2:" As #1
     Print #1,1
     Input #1,Data1,Data2,Data3
+
+    ` Check Game Over condition 
+    If Data1 = 0  Then
+        M_Out(13)=1  'Green LED ON
+        M_Out(12)=1  'Red LED ON
+        Dly 0.2
+        M_Out(13)=0  'Green LED ON
+        M_Out(12)=0  'Red LED ON
+        Dly 0.2
+        M_Out(13)=1  'Green LED ON
+        M_Out(12)=1  'Red LED ON
+        Dly 0.2
+        M_Out(13)=0  'Green LED ON
+        M_Out(12)=0  'Red LED ON
+        Dly 0.2
+        M_Out(13)=1  'Green LED ON
+        M_Out(12)=1  'Red LED ON
+        Dly 0.2
+        M_Out(13)=0  'Green LED ON
+        M_Out(12)=0  'Red LED ON
+        Dly 0.2
+        M_Out(13)=1  'Green LED ON
+        M_Out(12)=1  'Red LED ON
+        Dly 0.2
+        M_Out(13)=0  'Green LED ON
+        M_Out(12)=0  'Red LED ON
+        Dly 0.2
+        button_click_waitt()
+    EndIf
+
     'PSRC Decision'
     Select Data1
     Case 1
