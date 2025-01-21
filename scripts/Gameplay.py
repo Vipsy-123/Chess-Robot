@@ -1,4 +1,19 @@
 
+"""
+Author: Vipul Pardeshi
+Copyright: SVR Robotics 2025
+
+Description :
+This script controls a chess game where moves can be made by both a human player and a robot. 
+The ChessRobotController class handles the game state, visualizations, legal move calculations, 
+and error handling. The game can be played with the robot making moves or a human player interacting with it.
+
+The class generates visual board states, saves FEN representations of the game, tracks legal moves, 
+and handles state transitions between robot and human turns. It also offers error recovery mechanisms 
+to handle interruptions and failures in gameplay.
+
+"""
+
 import time
 import json
 import socket

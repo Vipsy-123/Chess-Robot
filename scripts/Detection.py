@@ -1,3 +1,18 @@
+"""
+Author: Vipul Pardeshi  
+Copyright: SVR Robotics, 2025  
+
+Description:  
+1. This script leverages a Roboflow model to perform chess-piece detection on a chessboard image.  
+2. The pipeline involves:  
+   - Loading the model and configuring NMS (Non-Maximum Suppression) parameters.  
+   - Reading and resizing the input chessboard image for inference.  
+   - Applying the model for detection and annotating results.  
+   - Saving predictions in JSON format for further processing.  
+   - Visualizing the annotated image with bounding boxes.  
+3. Continuous inference and error handling ensure robust execution.
+"""
+
 import cv2
 from inference.models.utils import get_roboflow_model
 from inference.core.nms import w_np_non_max_suppression

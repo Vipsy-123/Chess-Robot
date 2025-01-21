@@ -1,3 +1,18 @@
+"""
+Author: Vipul Pardeshi  
+Copyright: SVR Robotics, 2025  
+
+Description:  
+This script processes chess piece predictions to maintain and visualize a chessboard state.  
+Key functionalities include:  
+1. Mapping predictions to chessboard squares.  
+2. Updating the board state in FEN format.  
+3. Generating and displaying visual representations of the board.  
+
+Usage:  
+Run the script to continuously process predictions. Press `Ctrl+C` to stop the loop.  
+"""
+
 import chess
 import chess.svg
 import wand.image

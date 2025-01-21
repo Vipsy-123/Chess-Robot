@@ -1,12 +1,14 @@
 
-'''  
-    Code Description:-
+"""
+Author: Vipul Pardeshi
+Copyright: SVR Robotics, 2025
 
-    1] This script sets up an inference pipeline to detect corners of a chessboard in a live video stream from a webcam.
-    2] It annotates the detected corners on the video frame and extracts the chessboard image.
-    3] The extracted Chessboard image is then saved for further processing.
+Description:
+1. This script sets up an inference pipeline to detect corners of a chessboard in a live video stream from a webcam.
+2. It annotates the detected corners on the video frame and extracts the chessboard image.
+3. The extracted chessboard image is then saved for further processing.
+"""
 
-'''
 import cv2
 from inference import InferencePipeline
 from inference.models.utils import get_roboflow_model
